@@ -1,0 +1,132 @@
+/* ── mypage.js · mypage 페이지 전용 스크립트 ── */
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openChangeEmailModal() { document.getElementById('emailModal').classList.add('open'); }
+function openChangePwModal() { document.getElementById('pwModal').classList.add('open'); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity='1';
+  t.style.transform='translateX(-50%) translateY(0)';
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; }, 2000);
+}
+
+function saveEmail() {
+  const email = document.getElementById('newEmail').value.trim();
+  if (!email) return;
+  const user = Storage.getUser();
+  if (user) { user.email = email; Storage.setUser(user); }
+  closeModal('emailModal');
+  showToast('이메일이 변경됐어요 ✓');
+  loadUserInfo();
+}
+
+function savePassword() {
+  const pw = document.getElementById('newPw').value;
+  const confirm = document.getElementById('newPwConfirm').value;
+  if (pw !== confirm || pw.length < 8) { showToast('비밀번호를 확인해주세요'); return; }
+  closeModal('pwModal');
+  showToast('비밀번호가 변경됐어요 ✓');
+}
+
+function exportData() {
+  const ledger = Storage.getLedger();
+  if (!ledger.length) { showToast('내보낼 데이터가 없어요'); return; }
+  const csv = '날짜,구분,내용,카테고리,금액\n' + ledger.map(t =>
+    `${t.date},${t.type==='income'?'수입':'지출'},${t.desc},${t.category},${t.amount}`
+  ).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'spendletter_export.csv';
+  a.click();
+}
+
+function confirmReset() {
+  if (confirm('정말 모든 데이터를 초기화할까요? 이 작업은 되돌릴 수 없어요.')) {
+    localStorage.removeItem('sl_ledger');
+    localStorage.removeItem('sl_categories');
+    localStorage.removeItem('sl_last_analysis');
+    showToast('데이터가 초기화됐어요');
+  }
+}
+
+function loadUserInfo() {
+  const user = Storage.getUser();
+  if (!user) return;
+  const initials = (user.email||'U')[0].toUpperCase();
+  document.getElementById('sidebarAvatar').textContent = initials;
+  document.getElementById('sidebarEmail').textContent = user.email||'';
+  document.getElementById('profileAvatar').textContent = initials;
+  document.getElementById('profileEmail').textContent = user.email||'';
+  document.getElementById('currentEmailDisplay').textContent = '현재: ' + (user.email||'');
+
+  const joined = new Date(user.createdAt||Date.now());
+  document.getElementById('profileJoined').textContent = '가입일: ' + joined.getFullYear() + '.' + String(joined.getMonth()+1).padStart(2,'0') + '.' + String(joined.getDate()).padStart(2,'0');
+
+  const cats = Storage.getCategories();
+  const txs = Storage.getLedger();
+  document.getElementById('catCount').textContent = '카테고리 ' + cats.length + '개';
+  document.getElementById('txCount').textContent = '거래내역 ' + txs.length + '건';
+
+  document.getElementById('emailNewsToggle').checked = Storage.getEmailSubscription();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!Storage.isLoggedIn()) { window.location.href='index.html'; return; }
+  loadUserInfo();
+
+  document.getElementById('emailNewsToggle').addEventListener('change', function() {
+    Storage.setEmailSubscription(this.checked);
+    showToast(this.checked ? '이메일 수신이 활성화됐어요' : '이메일 수신이 중단됐어요');
+  });
+});
+
+async function sendNewsletterNow() {
+  const user = Storage.getUser();
+  if (!user) return;
+
+  const cats = Storage.getCategories();
+  if (!cats.length) { showToast('카테고리를 먼저 설정해주세요'); return; }
+
+  const sendTimeVal = document.getElementById('sendTimeSelect').value;
+  const hour = parseInt(sendTimeVal);
+  const sendTimeLabel = hour < 12 ? `오전 ${hour || 12}시` : `오후 ${hour === 12 ? 12 : hour - 12}시`;
+
+  const today = new Date();
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  const todayDate = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일 ${days[today.getDay()]}요일`;
+
+  const categoryMap = {
+    '경제': '경제·금융', 'IT': 'IT·테크', '부동산': '부동산',
+    '건강': '건강·운동', '음식': '음식·요리', '여행': '여행',
+    '문화': '문화·엔터', '스포츠': '스포츠', '사회': '사회·정치'
+  };
+  const categoriesStr = cats.map(c => categoryMap[c] || c).join(', ');
+
+  showToast('발송 중...');
+
+  try {
+    const res = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to_email: user.email,
+        user_name: user.name || user.email.split('@')[0],
+        today_date: todayDate,
+        categories: categoriesStr,
+        send_time: sendTimeLabel,
+        app_url: window.location.origin + '/feed.html'
+      })
+    });
+
+    if (res.ok) {
+      showToast('이메일이 발송됐어요 ✓');
+    } else {
+      showToast('발송에 실패했어요. 다시 시도해주세요');
+    }
+  } catch (e) {
+    showToast('발송에 실패했어요. 다시 시도해주세요');
+  }
+}

@@ -1,0 +1,134 @@
+@charset "UTF-8";
+
+/* login.html / signup.html 전용 */
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.auth-left {
+  background: linear-gradient(160deg, #4F46E5 0%, #7C3AED 60%, #4338CA 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px 56px;
+  position: relative;
+  overflow: hidden;
+}
+.auth-left::before {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+  top: -100px; right: -100px;
+}
+.auth-left::after {
+  content: '';
+  position: absolute;
+  width: 300px; height: 300px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+  bottom: -80px; left: -60px;
+}
+.auth-left-content { position: relative; z-index: 1; }
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 56px;
+  text-decoration: none;
+}
+.auth-brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.02em;
+}
+.auth-headline {
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+.auth-desc {
+  font-size: 16px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.7;
+  margin-bottom: 48px;
+}
+.auth-features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.auth-feature {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.auth-feature-icon {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+.auth-feature-text {
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  font-weight: 500;
+  line-height: 1.5;
+}
+.auth-right {
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 56px;
+}
+.auth-form-wrap {
+  width: 100%;
+  max-width: 400px;
+}
+.auth-form-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--gray-800);
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+.auth-form-sub {
+  font-size: 14px;
+  color: var(--gray-400);
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+@media (max-width: 768px) {
+  .auth-shell { grid-template-columns: 1fr; }
+  .auth-left { display: none; }
+  .auth-right { padding: 40px 24px; }
+}
+/* ── 약관 링크 버튼 ── */
+.term-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font);
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--indigo-600);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+.term-link:hover {
+  color: var(--indigo-700);
+}

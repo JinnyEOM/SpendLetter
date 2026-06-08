@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpendLetter — 시작하기</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+
+<div class="onboarding-shell">
+  <div class="onboarding-card">
+
+    <!-- Brand -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:36px;">
+      <div class="nav-icon" style="width:32px;height:32px;">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" fill="white"/></svg>
+      </div>
+      <span style="font-size:16px;font-weight:700;color:var(--gray-800);letter-spacing:-0.02em;">SpendLetter</span>
+    </div>
+
+    <!-- Step indicator -->
+    <div class="onboarding-step-indicator" id="stepIndicator">
+      <div class="step-dot active" id="dot1">1</div>
+      <div class="step-connector" id="conn1"></div>
+      <div class="step-dot" id="dot2">2</div>
+      <div class="step-connector" id="conn2"></div>
+      <div class="step-dot" id="dot3">3</div>
+    </div>
+
+    <!-- ── STEP 1: 소비 입력 방식 선택 ── -->
+    <div id="step1">
+      <p class="onboarding-title">어떻게 소비 내역을<br>입력하실 건가요?</p>
+      <p class="onboarding-sub">소비 패턴 분석을 위해 거래 내역이 필요해요.<br>편한 방법을 선택해 주세요.</p>
+
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+        <label style="display:flex;align-items:center;gap:16px;padding:20px;border:2px solid var(--gray-200);border-radius:14px;cursor:pointer;transition:all 0.2s;" class="input-method-item" data-method="manual">
+          <div style="width:48px;height:48px;background:var(--indigo-50);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#4F46E5" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--gray-800);margin-bottom:3px;">직접 입력하기</div>
+            <div style="font-size:13px;color:var(--gray-400);">거래 항목을 하나씩 직접 입력할게요</div>
+          </div>
+        </label>
+
+        <label style="display:flex;align-items:center;gap:16px;padding:20px;border:2px solid var(--gray-200);border-radius:14px;cursor:pointer;transition:all 0.2s;" class="input-method-item" data-method="csv">
+          <div style="width:48px;height:48px;background:#ECFDF5;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="4" stroke="#059669" stroke-width="2"/><path d="M8 8h8M8 12h8M8 16h5" stroke="#059669" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--gray-800);margin-bottom:3px;">CSV 파일 업로드</div>
+            <div style="font-size:13px;color:var(--gray-400);">은행 앱에서 내보낸 CSV 파일을 업로드해요</div>
+          </div>
+        </label>
+
+        <label style="display:flex;align-items:center;gap:16px;padding:20px;border:2px solid var(--gray-200);border-radius:14px;cursor:pointer;transition:all 0.2s;" class="input-method-item" data-method="later">
+          <div style="width:48px;height:48px;background:var(--gray-100);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#9CA3AF" stroke-width="2"/><path d="M12 7v5l3 3" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--gray-800);margin-bottom:3px;">나중에 입력하기</div>
+            <div style="font-size:13px;color:var(--gray-400);">먼저 서비스를 둘러보고 나중에 입력할게요</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="onboarding-actions">
+        <button class="onboarding-next" onclick="goStep(2)">다음으로 →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: 카테고리 선택 ── -->
+    <div id="step2" style="display:none;">
+      <p class="onboarding-title">관심 있는 뉴스<br>카테고리를 선택해요</p>
+      <p class="onboarding-sub">최대 3개까지 선택할 수 있어요. AI가 소비 패턴을 분석해<br>자동으로 추천해드리지만, 직접 수정도 가능해요.</p>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <span style="font-size:13px;color:var(--gray-400);">선택된 카테고리</span>
+        <span id="selectedCount" style="font-size:13px;font-weight:700;color:var(--indigo-600);">0 / 3</span>
+      </div>
+
+      <div class="category-grid" id="categoryGrid">
+        <div class="category-item" data-cat="경제">
+          <div class="category-item-icon">📈</div>
+          <div class="category-item-name">경제·금융</div>
+        </div>
+        <div class="category-item" data-cat="IT">
+          <div class="category-item-icon">💻</div>
+          <div class="category-item-name">IT·테크</div>
+        </div>
+        <div class="category-item" data-cat="부동산">
+          <div class="category-item-icon">🏠</div>
+          <div class="category-item-name">부동산</div>
+        </div>
+        <div class="category-item" data-cat="건강">
+          <div class="category-item-icon">🏃</div>
+          <div class="category-item-name">건강·운동</div>
+        </div>
+        <div class="category-item" data-cat="음식">
+          <div class="category-item-icon">🍽️</div>
+          <div class="category-item-name">음식·요리</div>
+        </div>
+        <div class="category-item" data-cat="여행">
+          <div class="category-item-icon">✈️</div>
+          <div class="category-item-name">여행</div>
+        </div>
+        <div class="category-item" data-cat="문화">
+          <div class="category-item-icon">🎭</div>
+          <div class="category-item-name">문화·엔터</div>
+        </div>
+        <div class="category-item" data-cat="스포츠">
+          <div class="category-item-icon">⚽</div>
+          <div class="category-item-name">스포츠</div>
+        </div>
+        <div class="category-item" data-cat="사회">
+          <div class="category-item-icon">🌏</div>
+          <div class="category-item-name">사회·정치</div>
+        </div>
+      </div>
+
+      <div class="onboarding-actions">
+        <button class="onboarding-back" onclick="goStep(1)">이전</button>
+        <button class="onboarding-next" onclick="goStep(3)" id="step2Next" disabled style="opacity:0.4;cursor:not-allowed;">다음으로 →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: 이메일 수신 설정 ── -->
+    <div id="step3" style="display:none;">
+      <p class="onboarding-title">뉴스레터 수신<br>방법을 설정해요</p>
+      <p class="onboarding-sub">매일 오전 원하는 시간에 맞춤 뉴스레터를 이메일로<br>받아볼 수 있어요.</p>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--gray-800);margin-bottom:3px;">이메일 뉴스레터 수신</div>
+            <div style="font-size:13px;color:var(--gray-400);">매일 아침 맞춤 뉴스를 이메일로 받아요</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="emailToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div id="emailSettings">
+          <div class="app-form-group">
+            <label>수신 이메일</label>
+            <input type="email" class="app-input" id="receiveEmail" placeholder="뉴스레터를 받을 이메일 주소">
+          </div>
+          <div class="app-form-group" style="margin-bottom:0;">
+            <label>발송 시간</label>
+            <select class="app-select" id="sendTime">
+              <option value="07:00">오전 7시</option>
+              <option value="08:00" selected>오전 8시</option>
+              <option value="09:00">오전 9시</option>
+              <option value="10:00">오전 10시</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="background:var(--indigo-50);border-color:var(--indigo-100);">
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <div style="width:36px;height:36px;background:var(--indigo-600);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l2 4.5H16l-4 3 1.5 4.5L9 11.5 5.5 14 7 9.5l-4-3h5L9 2z" fill="white"/></svg>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--indigo-700);margin-bottom:3px;">AI 추천 카테고리</div>
+            <div style="font-size:13px;color:var(--indigo-600);line-height:1.6;">소비 내역이 입력되면 AI가 자동으로 분석해 카테고리를 추천해드려요. 매달 1일에 업데이트됩니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="onboarding-actions">
+        <button class="onboarding-back" onclick="goStep(2)">이전</button>
+        <button class="onboarding-next" onclick="finishOnboarding()">시작하기 🎉</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/pages/onboarding.js"></script>
+</body>
+</html>

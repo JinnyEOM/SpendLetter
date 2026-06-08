@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpendLetter — 소비 분석</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-brand">
+      <div class="nav-icon" style="width:32px;height:32px;">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" fill="white"/></svg>
+      </div>
+      <span class="sidebar-brand-name">SpendLetter</span>
+    </a>
+    <nav class="sidebar-nav">
+      <a href="feed.html">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="2" fill="currentColor" opacity="0.3"/><rect x="10" y="2" width="6" height="6" rx="2" fill="currentColor"/><rect x="2" y="10" width="6" height="6" rx="2" fill="currentColor"/><rect x="10" y="10" width="6" height="6" rx="2" fill="currentColor" opacity="0.3"/></svg>
+        마이 피드
+      </a>
+      <a href="ledger.html">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h8M5 10h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        가계부
+      </a>
+      <a href="analysis.html" class="active">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 14l4-5 3 3 5-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        소비 분석
+      </a>
+      <a href="category.html">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="5" cy="9" r="2" fill="currentColor"/><path d="M9 9h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="5" cy="5" r="2" fill="currentColor" opacity="0.4"/><path d="M9 5h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/><circle cx="5" cy="13" r="2" fill="currentColor" opacity="0.4"/><path d="M9 13h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/></svg>
+        카테고리
+      </a>
+      <a href="mypage.html">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3 15c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        마이 페이지
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarAvatar">U</div>
+        <div class="user-info">
+          <div class="user-email" id="sidebarEmail">user@email.com</div>
+          <div class="logout-btn" onclick="Storage.logout()">로그아웃</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <div class="page-header">
+      <div>
+        <h1>소비 분석</h1>
+        <div class="page-header-sub">소비 패턴을 AI가 분석해드려요</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:13px;color:var(--gray-400);">분석 기준월:</span>
+        <select class="app-select" style="width:140px;height:36px;font-size:13px;" id="analysisMonth">
+          <option value="6" selected>2026년 6월</option>
+          <option value="5">2026년 5월</option>
+          <option value="4">2026년 4월</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <!-- KPI row -->
+      <div class="grid-4" style="margin-bottom:28px;">
+        <div class="stat-card">
+          <div class="stat-card-label">총 지출</div>
+          <div class="stat-card-value amount-expense">₩412,800</div>
+          <div class="stat-card-change" style="color:var(--error);">↑ 전월 대비 12%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">일평균 지출</div>
+          <div class="stat-card-value">₩68,800</div>
+          <div class="stat-card-change" style="color:var(--gray-400);">4일 기준</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">최다 지출 카테고리</div>
+          <div class="stat-card-value" style="font-size:18px;">🍽️ 식비</div>
+          <div class="stat-card-change" style="color:var(--gray-400);">₩165,000</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">거래 건수</div>
+          <div class="stat-card-value">18건</div>
+          <div class="stat-card-change" style="color:var(--gray-400);">이번달</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:24px;">
+        <!-- 카테고리별 지출 -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+            <div>
+              <div class="card-title">카테고리별 지출</div>
+              <div class="card-sub">이번달 지출 분포</div>
+            </div>
+            <span class="chip chip-indigo">6월</span>
+          </div>
+
+          <!-- SVG Donut Chart -->
+          <div style="display:flex;align-items:center;gap:24px;">
+            <svg viewBox="0 0 160 160" width="160" height="160" style="flex-shrink:0;">
+              <!-- Donut segments (식비 40%, 교통 10%, 쇼핑 30%, 문화 12%, 기타 8%) -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#E5E7EB" stroke-width="24"/>
+              <!-- 식비 40% -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#4F46E5" stroke-width="24"
+                stroke-dasharray="150.8 226.2" stroke-dashoffset="0" transform="rotate(-90 80 80)"/>
+              <!-- 쇼핑 30% -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#818CF8" stroke-width="24"
+                stroke-dasharray="113.1 263.9" stroke-dashoffset="-150.8" transform="rotate(-90 80 80)"/>
+              <!-- 교통 10% -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#C7D2FE" stroke-width="24"
+                stroke-dasharray="37.7 339.3" stroke-dashoffset="-263.9" transform="rotate(-90 80 80)"/>
+              <!-- 문화 12% -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#FCA5A5" stroke-width="24"
+                stroke-dasharray="45.2 331.8" stroke-dashoffset="-301.6" transform="rotate(-90 80 80)"/>
+              <!-- 기타 8% -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#FCD34D" stroke-width="24"
+                stroke-dasharray="30.2 346.8" stroke-dashoffset="-346.8" transform="rotate(-90 80 80)"/>
+              <text x="80" y="76" text-anchor="middle" font-size="14" font-weight="800" fill="#1F2937" font-family="Pretendard,sans-serif">₩412K</text>
+              <text x="80" y="92" text-anchor="middle" font-size="10" fill="#9CA3AF" font-family="Pretendard,sans-serif">총 지출</text>
+            </svg>
+
+            <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:3px;background:#4F46E5;flex-shrink:0;"></div><span style="font-size:13px;color:var(--gray-700);">🍽️ 식비</span></div>
+                <span style="font-size:13px;font-weight:700;color:var(--gray-800);">40%</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:3px;background:#818CF8;flex-shrink:0;"></div><span style="font-size:13px;color:var(--gray-700);">🛍️ 쇼핑</span></div>
+                <span style="font-size:13px;font-weight:700;color:var(--gray-800);">30%</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:3px;background:#C7D2FE;flex-shrink:0;"></div><span style="font-size:13px;color:var(--gray-700);">🚇 교통</span></div>
+                <span style="font-size:13px;font-weight:700;color:var(--gray-800);">10%</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:3px;background:#FCA5A5;flex-shrink:0;"></div><span style="font-size:13px;color:var(--gray-700);">🎭 문화</span></div>
+                <span style="font-size:13px;font-weight:700;color:var(--gray-800);">12%</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:3px;background:#FCD34D;flex-shrink:0;"></div><span style="font-size:13px;color:var(--gray-700);">📦 기타</span></div>
+                <span style="font-size:13px;font-weight:700;color:var(--gray-800);">8%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 주간 지출 트렌드 -->
+        <div class="card">
+          <div style="margin-bottom:24px;">
+            <div class="card-title">주간 지출 트렌드</div>
+            <div class="card-sub">이번달 주별 지출 추이</div>
+          </div>
+          <svg viewBox="0 0 320 180" width="100%" style="overflow:visible;">
+            <!-- Grid lines -->
+            <line x1="40" y1="20" x2="300" y2="20" stroke="#F3F4F6" stroke-width="1"/>
+            <line x1="40" y1="60" x2="300" y2="60" stroke="#F3F4F6" stroke-width="1"/>
+            <line x1="40" y1="100" x2="300" y2="100" stroke="#F3F4F6" stroke-width="1"/>
+            <line x1="40" y1="140" x2="300" y2="140" stroke="#F3F4F6" stroke-width="1"/>
+            <!-- Y labels -->
+            <text x="30" y="24" text-anchor="end" font-size="9" fill="#9CA3AF" font-family="Pretendard">50만</text>
+            <text x="30" y="64" text-anchor="end" font-size="9" fill="#9CA3AF" font-family="Pretendard">30만</text>
+            <text x="30" y="104" text-anchor="end" font-size="9" fill="#9CA3AF" font-family="Pretendard">20만</text>
+            <text x="30" y="144" text-anchor="end" font-size="9" fill="#9CA3AF" font-family="Pretendard">10만</text>
+            <!-- Bars -->
+            <rect x="70" y="80" width="36" height="60" rx="6" fill="#4F46E5" opacity="0.15"/>
+            <rect x="70" y="60" width="36" height="80" rx="6" fill="#4F46E5"/>
+            <rect x="140" y="90" width="36" height="50" rx="6" fill="#4F46E5" opacity="0.15"/>
+            <rect x="140" y="70" width="36" height="70" rx="6" fill="#4F46E5"/>
+            <rect x="210" y="100" width="36" height="40" rx="6" fill="#4F46E5" opacity="0.15"/>
+            <rect x="210" y="90" width="36" height="50" rx="6" fill="#4F46E5"/>
+            <rect x="280" y="120" width="36" height="20" rx="6" fill="#4F46E5" opacity="0.3"/>
+            <!-- X labels -->
+            <text x="88" y="158" text-anchor="middle" font-size="10" fill="#6B7280" font-family="Pretendard">1주</text>
+            <text x="158" y="158" text-anchor="middle" font-size="10" fill="#6B7280" font-family="Pretendard">2주</text>
+            <text x="228" y="158" text-anchor="middle" font-size="10" fill="#6B7280" font-family="Pretendard">3주</text>
+            <text x="298" y="158" text-anchor="middle" font-size="10" fill="#9CA3AF" font-family="Pretendard">4주</text>
+            <!-- Values -->
+            <text x="88" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#4F46E5" font-family="Pretendard">18만</text>
+            <text x="158" y="65" text-anchor="middle" font-size="9" font-weight="700" fill="#4F46E5" font-family="Pretendard">16만</text>
+            <text x="228" y="85" text-anchor="middle" font-size="9" font-weight="700" fill="#4F46E5" font-family="Pretendard">12만</text>
+            <text x="298" y="115" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="Pretendard">진행중</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- AI 인사이트 -->
+      <div class="card" style="border-color:var(--indigo-100);background:linear-gradient(135deg,#F8F9FF 0%,white 100%);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <div style="width:40px;height:40px;background:var(--indigo-600);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l2 4.5H17l-4 3 1.5 4.5L10 11.5l-4.5 2.5L7 9.5 3 6.5h5L10 2z" fill="white"/></svg>
+          </div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--gray-800);">AI 소비 인사이트</div>
+            <div style="font-size:12px;color:var(--gray-400);">Claude AI가 분석한 이달의 소비 패턴</div>
+          </div>
+          <span class="chip chip-indigo" style="margin-left:auto;">AI 분석</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+          <div style="background:white;border:1px solid var(--gray-200);border-radius:12px;padding:16px;">
+            <div style="font-size:20px;margin-bottom:8px;">📊</div>
+            <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:6px;">식비 집중 패턴</div>
+            <div style="font-size:12px;color:var(--gray-600);line-height:1.6;">전체 지출의 40%가 식비에 집중되어 있어요. 주로 점심 시간대와 주말 저녁에 지출이 몰려 있습니다.</div>
+          </div>
+          <div style="background:white;border:1px solid var(--gray-200);border-radius:12px;padding:16px;">
+            <div style="font-size:20px;margin-bottom:8px;">📈</div>
+            <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:6px;">쇼핑 증가 추세</div>
+            <div style="font-size:12px;color:var(--gray-600);line-height:1.6;">지난달 대비 쇼핑 지출이 23% 증가했어요. 온라인 쇼핑몰 이용이 늘어난 것으로 보입니다.</div>
+          </div>
+          <div style="background:white;border:1px solid var(--indigo-100);border-radius:12px;padding:16px;background:var(--indigo-50);">
+            <div style="font-size:20px;margin-bottom:8px;">💡</div>
+            <div style="font-size:13px;font-weight:700;color:var(--indigo-700);margin-bottom:6px;">추천 뉴스 카테고리</div>
+            <div style="font-size:12px;color:var(--indigo-600);line-height:1.6;">소비 패턴을 바탕으로 <strong>음식·요리</strong>, <strong>쇼핑 트렌드</strong>, <strong>생활경제</strong> 카테고리를 추천드려요.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/pages/analysis.js"></script>
+</body>
+</html>

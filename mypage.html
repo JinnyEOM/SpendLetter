@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpendLetter — 마이 페이지</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-brand">
+      <div class="nav-icon" style="width:32px;height:32px;">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" fill="white"/></svg>
+      </div>
+      <span class="sidebar-brand-name">SpendLetter</span>
+    </a>
+    <nav class="sidebar-nav">
+      <a href="feed.html">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="2" fill="currentColor" opacity="0.3"/><rect x="10" y="2" width="6" height="6" rx="2" fill="currentColor"/><rect x="2" y="10" width="6" height="6" rx="2" fill="currentColor"/><rect x="10" y="10" width="6" height="6" rx="2" fill="currentColor" opacity="0.3"/></svg>
+        마이 피드
+      </a>
+      <a href="ledger.html">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h8M5 10h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        가계부
+      </a>
+      <a href="analysis.html">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 14l4-5 3 3 5-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        소비 분석
+      </a>
+      <a href="category.html">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="5" cy="9" r="2" fill="currentColor"/><path d="M9 9h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="5" cy="5" r="2" fill="currentColor" opacity="0.4"/><path d="M9 5h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/><circle cx="5" cy="13" r="2" fill="currentColor" opacity="0.4"/><path d="M9 13h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/></svg>
+        카테고리
+      </a>
+      <a href="mypage.html" class="active">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M3 15c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        마이 페이지
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarAvatar">U</div>
+        <div class="user-info">
+          <div class="user-email" id="sidebarEmail">user@email.com</div>
+          <div class="logout-btn" onclick="Storage.logout()">로그아웃</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <div class="page-header">
+      <div>
+        <h1>마이 페이지</h1>
+        <div class="page-header-sub">계정 및 알림 설정</div>
+      </div>
+    </div>
+
+    <div class="page-body" style="max-width:720px;">
+
+      <!-- Profile header card -->
+      <div class="profile-header-card">
+        <div class="profile-avatar-lg" id="profileAvatar">U</div>
+        <div class="profile-info">
+          <h2 id="profileEmail">user@email.com</h2>
+          <p id="profileJoined">가입일: 2026.06.04</p>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+            <span style="padding:5px 12px;background:rgba(255,255,255,0.2);border-radius:100px;font-size:12px;font-weight:600;" id="catCount">카테고리 0개</span>
+            <span style="padding:5px 12px;background:rgba(255,255,255,0.2);border-radius:100px;font-size:12px;font-weight:600;" id="txCount">거래내역 0건</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 이메일 알림 설정 -->
+      <div class="settings-section">
+        <div class="settings-section-title">이메일 알림</div>
+
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <h4>뉴스레터 이메일 수신</h4>
+            <p>매일 오전 맞춤 뉴스레터를 이메일로 받아요</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="emailNewsToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <h4>발송 시간</h4>
+            <p>뉴스레터를 받을 시간을 선택해요</p>
+          </div>
+          <select class="app-select" style="width:130px;height:36px;font-size:13px;" id="sendTimeSelect">
+            <option value="0">오전 12시</option>
+            <option value="1">오전 1시</option>
+            <option value="2">오전 2시</option>
+            <option value="3">오전 3시</option>
+            <option value="4">오전 4시</option>
+            <option value="5">오전 5시</option>
+            <option value="6">오전 6시</option>
+            <option value="7">오전 7시</option>
+            <option value="8" selected>오전 8시</option>
+            <option value="9">오전 9시</option>
+            <option value="10">오전 10시</option>
+            <option value="11">오전 11시</option>
+            <option value="12">오후 12시</option>
+            <option value="13">오후 1시</option>
+            <option value="14">오후 2시</option>
+            <option value="15">오후 3시</option>
+            <option value="16">오후 4시</option>
+            <option value="17">오후 5시</option>
+            <option value="18">오후 6시</option>
+            <option value="19">오후 7시</option>
+            <option value="20">오후 8시</option>
+            <option value="21">오후 9시</option>
+            <option value="22">오후 10시</option>
+            <option value="23">오후 11시</option>
+          </select>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <h4>카테고리 업데이트 알림</h4>
+            <p>매달 1일 AI 카테고리 추천 결과를 알려드려요</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="catUpdateToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <h4>지금 바로 발송</h4>
+          <p>테스트용 뉴스레터를 지금 즉시 발송해요</p>
+        </div>
+        <button class="btn-sm btn-sm-primary" onclick="sendNewsletterNow()">발송하기</button>
+      </div>
+
+      <!-- 계정 설정 -->
+      <div class="settings-section">
+        <div class="settings-section-title">계정 설정</div>
+
+        <div class="settings-row" style="cursor:pointer;" onclick="openChangeEmailModal()">
+          <div class="settings-row-left">
+            <h4>이메일 변경</h4>
+            <p id="currentEmailDisplay">현재: user@email.com</p>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <div class="settings-row" style="cursor:pointer;" onclick="openChangePwModal()">
+          <div class="settings-row-left">
+            <h4>비밀번호 변경</h4>
+            <p>보안을 위해 주기적으로 변경해주세요</p>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <!-- 데이터 관리 -->
+      <div class="settings-section">
+        <div class="settings-section-title">데이터 관리</div>
+
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <h4>가계부 데이터 내보내기</h4>
+            <p>내 거래 내역을 CSV 파일로 다운로드해요</p>
+          </div>
+          <button class="btn-sm btn-sm-ghost" onclick="exportData()">내보내기</button>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <h4>전체 데이터 초기화</h4>
+            <p style="color:var(--error);">모든 가계부 내역과 설정이 삭제됩니다</p>
+          </div>
+          <button class="btn-sm btn-sm-danger" onclick="confirmReset()">초기화</button>
+        </div>
+      </div>
+
+      <!-- 로그아웃 -->
+      <div class="settings-section">
+        <div class="settings-section-title">계정</div>
+        <div class="settings-row" style="cursor:pointer;" onclick="Storage.logout()">
+          <div class="settings-row-left">
+            <h4 style="color:var(--error);">로그아웃</h4>
+            <p>현재 기기에서 로그아웃해요</p>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <p style="font-size:12px;color:var(--gray-400);text-align:center;padding:16px;">SpendLetter v1.0 · © 2026 SpendLetter</p>
+    </div>
+  </main>
+</div>
+
+<!-- Change Email Modal -->
+<div class="modal-overlay" id="emailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">이메일 변경</span>
+      <button class="modal-close" onclick="closeModal('emailModal')">✕</button>
+    </div>
+    <div class="app-form-group">
+      <label>새 이메일 주소</label>
+      <input type="email" class="app-input" id="newEmail" placeholder="새 이메일 주소 입력">
+    </div>
+    <div class="app-form-group" style="margin-bottom:24px;">
+      <label>비밀번호 확인</label>
+      <input type="password" class="app-input" id="emailChangePw" placeholder="현재 비밀번호 입력">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-sm btn-sm-ghost" style="flex:1;height:44px;" onclick="closeModal('emailModal')">취소</button>
+      <button class="btn-sm btn-sm-primary" style="flex:2;height:44px;" onclick="saveEmail()">변경하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal-overlay" id="pwModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">비밀번호 변경</span>
+      <button class="modal-close" onclick="closeModal('pwModal')">✕</button>
+    </div>
+    <div class="app-form-group">
+      <label>현재 비밀번호</label>
+      <input type="password" class="app-input" placeholder="현재 비밀번호">
+    </div>
+    <div class="app-form-group">
+      <label>새 비밀번호</label>
+      <input type="password" class="app-input" id="newPw" placeholder="영문 + 숫자 8자 이상">
+    </div>
+    <div class="app-form-group" style="margin-bottom:24px;">
+      <label>새 비밀번호 확인</label>
+      <input type="password" class="app-input" id="newPwConfirm" placeholder="비밀번호를 다시 입력하세요">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-sm btn-sm-ghost" style="flex:1;height:44px;" onclick="closeModal('pwModal')">취소</button>
+      <button class="btn-sm btn-sm-primary" style="flex:2;height:44px;" onclick="savePassword()">변경하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gray-800);color:white;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:500;opacity:0;transition:all 0.3s;z-index:300;pointer-events:none;"></div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/pages/mypage.js"></script>
+</body>
+</html>
