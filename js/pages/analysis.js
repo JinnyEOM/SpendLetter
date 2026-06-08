@@ -172,13 +172,13 @@ function renderWeeklyBar(expenses, month, year) {
   });
 }
 async function loadAIInsight(transactions, month, year) {
-  const insightEl = document.querySelector('.card:last-child .grid-template-columns');
-  const cards = document.querySelectorAll('[style*="border-radius:12px;padding:16px"]');
+  const cards = [
+    document.getElementById('insightCard0'),
+    document.getElementById('insightCard1'),
+    document.getElementById('insightCard2'),
+  ];
 
-  // 로딩 상태
-  cards.forEach(c => {
-    c.style.opacity = '0.5';
-  });
+  cards.forEach(c => { if (c) c.style.opacity = '0.5'; });
 
   try {
     const res = await fetch('/api/analyze', {
@@ -190,22 +190,20 @@ async function loadAIInsight(transactions, month, year) {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
-    const cardEls = document.querySelectorAll('[style*="border-radius:12px;padding:16px"]');
-    if (cardEls[0]) {
-      cardEls[0].querySelector('div:nth-child(2)').textContent = '소비 패턴';
-      cardEls[0].querySelector('div:nth-child(3)').textContent = data.pattern;
-    }
-    if (cardEls[1]) {
-      cardEls[1].querySelector('div:nth-child(2)').textContent = '지출 트렌드';
-      cardEls[1].querySelector('div:nth-child(3)').textContent = data.trend;
-    }
-    if (cardEls[2]) {
-      cardEls[2].querySelector('div:nth-child(2)').textContent = '추천 카테고리';
-      cardEls[2].querySelector('div:nth-child(3)').innerHTML = data.recommendation;
-    }
+    const update = (titleId, contentId, title, content, asHtml = false) => {
+      const t = document.getElementById(titleId);
+      const c = document.getElementById(contentId);
+      if (t) t.textContent = title;
+      if (c) asHtml ? (c.innerHTML = content) : (c.textContent = content);
+    };
+
+    update('insightTitle0', 'insightContent0', '소비 패턴', data.pattern);
+    update('insightTitle1', 'insightContent1', '지출 트렌드', data.trend);
+    update('insightTitle2', 'insightContent2', '추천 카테고리', data.recommendation, true);
+
   } catch (e) {
     console.error('AI 분석 실패:', e);
   } finally {
-    cards.forEach(c => { c.style.opacity = '1'; });
+    cards.forEach(c => { if (c) c.style.opacity = '1'; });
   }
 }
