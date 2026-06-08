@@ -3,7 +3,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { transactions, month, year } = req.body;
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY가 설정되지 않았습니다.' });
+  }
+
+  const { transactions, month, year } = req.body || {};
+
+  if (!Array.isArray(transactions) || !month || !year) {
+    return res.status(400).json({ error: '필수 파라미터가 누락됐습니다. (transactions, month, year)' });
+  }
 
   const totalExpense = transactions.reduce((s, t) => s + Number(t.amount), 0);
   const catMap = {};
@@ -43,6 +51,12 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+
+    if (!response.ok) {
+      const message = data.error?.message || `Anthropic API 오류 (${response.status})`;
+      return res.status(response.status).json({ error: message });
+    }
+
     const text = data.content[0].text.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(text);
     res.status(200).json(parsed);

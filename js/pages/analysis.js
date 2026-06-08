@@ -178,6 +178,14 @@ async function loadAIInsight(transactions, month, year) {
     document.getElementById('insightCard2'),
   ];
 
+  // 데이터 없으면 API 호출 없이 안내 표시
+  if (!transactions.length) {
+    setInsight('insightTitle0', 'insightContent0', '소비 패턴', '이번 달 지출 내역이 없습니다. 가계부에 지출을 입력하면 AI 분석이 시작됩니다.');
+    setInsight('insightTitle1', 'insightContent1', '지출 트렌드', '데이터가 쌓이면 주간·월간 지출 흐름을 분석해 드립니다.');
+    setInsight('insightTitle2', 'insightContent2', '추천 카테고리', '지출 패턴을 바탕으로 맞춤 뉴스 카테고리를 추천해 드릴게요.');
+    return;
+  }
+
   cards.forEach(c => { if (c) c.style.opacity = '0.5'; });
 
   try {
@@ -190,20 +198,23 @@ async function loadAIInsight(transactions, month, year) {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
-    const update = (titleId, contentId, title, content, asHtml = false) => {
-      const t = document.getElementById(titleId);
-      const c = document.getElementById(contentId);
-      if (t) t.textContent = title;
-      if (c) asHtml ? (c.innerHTML = content) : (c.textContent = content);
-    };
-
-    update('insightTitle0', 'insightContent0', '소비 패턴', data.pattern);
-    update('insightTitle1', 'insightContent1', '지출 트렌드', data.trend);
-    update('insightTitle2', 'insightContent2', '추천 카테고리', data.recommendation, true);
+    setInsight('insightTitle0', 'insightContent0', '소비 패턴', data.pattern);
+    setInsight('insightTitle1', 'insightContent1', '지출 트렌드', data.trend);
+    setInsight('insightTitle2', 'insightContent2', '추천 카테고리', data.recommendation, true);
 
   } catch (e) {
+    setInsight('insightTitle0', 'insightContent0', 'AI 분석 실패', `오류: ${e.message}`);
+    setInsight('insightTitle1', 'insightContent1', '원인', '/api/analyze 호출 실패. API 키 또는 서버 상태를 확인해주세요.');
+    setInsight('insightTitle2', 'insightContent2', '해결 방법', 'Vercel 환경변수에 ANTHROPIC_API_KEY가 등록되어 있는지 확인하세요.');
     console.error('AI 분석 실패:', e);
   } finally {
     cards.forEach(c => { if (c) c.style.opacity = '1'; });
   }
+}
+
+function setInsight(titleId, contentId, title, content, asHtml = false) {
+  const t = document.getElementById(titleId);
+  const c = document.getElementById(contentId);
+  if (t) t.textContent = title;
+  if (c) asHtml ? (c.innerHTML = content) : (c.textContent = content);
 }
