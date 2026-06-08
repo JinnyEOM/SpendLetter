@@ -174,8 +174,8 @@ function generateMirror() {
   const top = sorted[0];
   const total = Object.values(catSum).reduce((s, v) => s + v, 0);
   const topPct = top ? Math.round(top[1] / total * 100) : 0;
-  const user = Storage.getUser();
-  const name = user ? (user.name || user.email.split('@')[0]) : '님';
+    const user = Storage.getUser();
+    const name = user ? (user.name || user.email.split('@')[0]) : '님';
 
   const mirror = {
     title: `이번 달 ${name}님의 지출 분석 리포트`,
