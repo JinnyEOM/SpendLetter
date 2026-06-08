@@ -147,9 +147,11 @@ function renderMirror(data) {
   `;
 }
 
-// ── AI 거울 생성 (가계부 데이터 기반) ──
-function generateMirror() {
+// ── AI 거울 생성 (가계부 데이터 기반 + /api/analyze 연동) ──
+async function generateMirror() {
   const ledger = Storage.getLedger();
+  const user = Storage.getUser();
+  const name = user ? (user.name || user.email.split('@')[0]) : '님';
 
   if (!ledger.length) {
     document.getElementById('mirrorBody').innerHTML = `
@@ -165,45 +167,66 @@ function generateMirror() {
     return;
   }
 
-  const catSum = ledger.reduce((acc, t) => {
-    if (t.type === 'expense') acc[t.category] = (acc[t.category] || 0) + Number(t.amount);
+  document.getElementById('mirrorBody').innerHTML = `
+    <div class="mirror-loading">
+      <div class="mirror-spinner"></div>
+      <span>AI가 소비 내역을 분석하는 중...</span>
+    </div>`;
+
+  const expenses = ledger.filter(t => t.type === 'expense');
+  const catSum = expenses.reduce((acc, t) => {
+    acc[t.category] = (acc[t.category] || 0) + Number(t.amount);
     return acc;
   }, {});
-
   const sorted = Object.entries(catSum).sort((a, b) => b[1] - a[1]);
   const top = sorted[0];
   const total = Object.values(catSum).reduce((s, v) => s + v, 0);
   const topPct = top ? Math.round(top[1] / total * 100) : 0;
-    const user = Storage.getUser();
-    const name = user ? (user.name || user.email.split('@')[0]) : '님';
+  const now = new Date();
 
-  const mirror = {
-    title: `이번 달 ${name}님의 지출 분석 리포트`,
-    headline: `총 지출 ${total.toLocaleString()}원 · ${top ? `${top[0]} 비중 ${topPct}%로 1위` : '카테고리 고른 분포'}`,
-    content: sorted.slice(0, 3).map(([cat, amt]) =>
-      `'${cat}' 항목에 ${amt.toLocaleString()}원 지출`
-    ).join(', ') + `이 기록되었습니다. ${top && topPct > 40 ? `특히 '${top[0]}' 지출이 전체의 ${topPct}%를 차지해 집중 관리가 필요한 구간입니다.` : '전반적으로 균형 잡힌 소비 패턴을 보이고 있습니다.'} 총 ${ledger.filter(t=>t.type==='expense').length}건의 지출 내역을 분석한 결과입니다.`,
-    advice: top && topPct > 35
-      ? `💡 '${top[0]}' 항목이 지출의 ${topPct}%를 차지합니다. 이번 주 하루만이라도 해당 카테고리 지출을 한 번 건너뛰어보세요. 월 기준 약 ${Math.round(top[1] * 0.2).toLocaleString()}원 절약이 가능합니다.`
-      : '💡 소비 균형이 양호합니다! 각 카테고리 예산 한도를 설정해 이 균형을 유지해보세요.'
-  };
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transactions: expenses,
+        month: now.getMonth() + 1,
+        year: now.getFullYear()
+      })
+    });
+    if (!res.ok && res.headers.get('content-type')?.includes('application/json') === false) {
+      throw new Error(`API 오류: ${res.status}`);
+    }
+    const aiData = await res.json();
+    if (aiData.error) throw new Error(aiData.error);
 
-  renderMirror(mirror);
+    renderMirror({
+      title: `이번 달 ${name}님의 지출 분석 리포트`,
+      headline: `총 지출 ${total.toLocaleString()}원 · ${top ? `${top[0]} 비중 ${topPct}%로 1위` : '카테고리 고른 분포'}`,
+      content: aiData.pattern + ' ' + aiData.trend,
+      advice: '💡 ' + aiData.recommendation
+    });
+  } catch (e) {
+    // AI API 실패 시 로컬 분석으로 폴백
+    renderMirror({
+      title: `이번 달 ${name}님의 지출 분석 리포트`,
+      headline: `총 지출 ${total.toLocaleString()}원 · ${top ? `${top[0]} 비중 ${topPct}%로 1위` : '카테고리 고른 분포'}`,
+      content: sorted.slice(0, 3).map(([cat, amt]) =>
+        `'${cat}' 항목에 ${amt.toLocaleString()}원 지출`
+      ).join(', ') + `이 기록되었습니다. ${top && topPct > 40 ? `특히 '${top[0]}' 지출이 전체의 ${topPct}%를 차지해 집중 관리가 필요한 구간입니다.` : '전반적으로 균형 잡힌 소비 패턴을 보이고 있습니다.'} 총 ${expenses.length}건의 지출 내역을 분석한 결과입니다.`,
+      advice: top && topPct > 35
+        ? `💡 '${top[0]}' 항목이 지출의 ${topPct}%를 차지합니다. 이번 주 하루만이라도 해당 카테고리 지출을 한 번 건너뛰어보세요. 월 기준 약 ${Math.round(top[1] * 0.2).toLocaleString()}원 절약이 가능합니다.`
+        : '💡 소비 균형이 양호합니다! 각 카테고리 예산 한도를 설정해 이 균형을 유지해보세요.'
+    });
+  }
 }
 
 // ── 거울 재생성 버튼 ──
-function regenerateMirror() {
+async function regenerateMirror() {
   const btn = document.getElementById('mirrorRefreshBtn');
   btn.disabled = true;
-  document.getElementById('mirrorBody').innerHTML = `
-    <div class="mirror-loading">
-      <div class="mirror-spinner"></div>
-      <span>소비 내역을 다시 분석하는 중...</span>
-    </div>`;
-  setTimeout(() => {
-    generateMirror();
-    btn.disabled = false;
-  }, 900);
+  await generateMirror();
+  btn.disabled = false;
 }
 
 // ── 피드 새로고침 (현재 탭 캐시 제거 후 재요청) ──

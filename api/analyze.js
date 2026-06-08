@@ -50,15 +50,22 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      const message = data.error?.message || `Anthropic API 오류 (${response.status})`;
+      let message = `Anthropic API 오류 (${response.status})`;
+      try {
+        const errData = await response.json();
+        message = errData.error?.message || message;
+      } catch (_) {}
       return res.status(response.status).json({ error: message });
     }
 
-    const text = data.content[0].text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(text);
+    const data = await response.json();
+    const rawText = data.content?.[0]?.text ?? '';
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return res.status(500).json({ error: 'AI 응답에서 JSON을 추출할 수 없습니다.' });
+    }
+    const parsed = JSON.parse(jsonMatch[0]);
     res.status(200).json(parsed);
   } catch (e) {
     res.status(500).json({ error: e.message });

@@ -195,6 +195,9 @@ async function loadAIInsight(transactions, month, year) {
       body: JSON.stringify({ transactions, month, year })
     });
 
+    if (!res.ok && res.headers.get('content-type')?.includes('application/json') === false) {
+      throw new Error(`API 오류: ${res.status}`);
+    }
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
