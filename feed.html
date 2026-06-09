@@ -11,14 +11,17 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 24px;
-      align-items: start;
+      align-items: stretch;
     }
-  
+
     .feed-panel {
       background: white;
       border: 1px solid var(--gray-200);
       border-radius: 12px;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 600px;
     }
   
     .feed-panel-head {
@@ -81,7 +84,19 @@
     .news-list {
       display: flex;
       flex-direction: column;
-      max-height: 560px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    #mirrorBody {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #aiNewsList {
+      flex: 1;
       overflow-y: auto;
     }
   
@@ -392,8 +407,8 @@
         <div class="feed-panel">
           <div class="feed-panel-head">
             <div>
-              <div class="feed-panel-title">소비 분석 리포트</div>
-              <div class="feed-panel-sub">이번 달 지출 기반 · AI 자동 분석</div>
+              <div class="feed-panel-title">AI 추천 뉴스</div>
+              <div class="feed-panel-sub">소비 패턴 분석 기반 · AI 자동 추천</div>
             </div>
             <button class="btn-sm btn-sm-ghost" onclick="regenerateMirror()" id="mirrorRefreshBtn" style="font-size:13px;">
               다시 분석

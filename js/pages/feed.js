@@ -1,6 +1,7 @@
 /* ── feed.js · 마이 피드 페이지 ── */
 
 const newsCache = {};
+const aiNewsCache = {};
 let activeCat = '';
 let categories = [];
 
@@ -118,31 +119,74 @@ function renderNewsList(articles) {
   `).join('');
 }
 
-// ── AI 거울 칼럼 렌더 ──
+// ── AI 추천 뉴스 탭 전환 ──
+function switchAICat(el, cat) {
+  document.querySelectorAll('#aiCatTabs .cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadAINewsForCat(cat);
+}
+
+// ── AI 추천 뉴스 로딩 ──
+async function loadAINewsForCat(cat) {
+  if (aiNewsCache[cat]) {
+    document.getElementById('aiNewsList').innerHTML = buildAINewsHtml(aiNewsCache[cat]);
+    return;
+  }
+  document.getElementById('aiNewsList').innerHTML = `
+    <div class="mirror-loading">
+      <div class="mirror-spinner"></div>
+      <span>뉴스를 불러오는 중...</span>
+    </div>`;
+  try {
+    const res = await fetch(`/api/news?category=${encodeURIComponent(cat)}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    aiNewsCache[cat] = data.articles || [];
+    document.getElementById('aiNewsList').innerHTML = buildAINewsHtml(aiNewsCache[cat]);
+  } catch (e) {
+    document.getElementById('aiNewsList').innerHTML = `
+      <div style="padding:40px 24px;text-align:center;">
+        <p style="font-size:13px;color:var(--gray-400);">뉴스를 불러오지 못했어요.</p>
+        <button onclick="loadAINewsForCat('${cat}')" style="margin-top:12px;padding:8px 18px;background:var(--indigo-600);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--font);">다시 시도</button>
+      </div>`;
+  }
+}
+
+// ── AI 뉴스 HTML 생성 ──
+function buildAINewsHtml(articles) {
+  if (!articles.length) return `<div style="padding:32px 24px;text-align:center;font-size:13px;color:var(--gray-400);">이 카테고리의 뉴스가 없습니다.</div>`;
+  return articles.map(n => `
+    <a href="${n.url}" target="_blank" rel="noopener noreferrer" class="news-list-item" style="text-decoration:none;display:block;color:inherit;">
+      <div class="news-list-meta">
+        <span class="news-source">${n.source}</span>
+        <span class="news-date">${timeAgo(n.publishedAt)}</span>
+      </div>
+      <h3>${n.title}</h3>
+      <p>${n.description}</p>
+      <div class="news-list-footer">
+        <span class="news-ai-badge">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 3v2l1.2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          실시간
+        </span>
+        <span style="font-size:11px;color:var(--gray-400);">↗ 원문 보기</span>
+      </div>
+    </a>`).join('');
+}
+
+// ── AI 추천 뉴스 렌더 ──
 function renderMirror(data) {
-  const user = Storage.getUser();
-  const name = user ? (user.name || user.email.split('@')[0]) : '구독자';
-  const ledgerCount = Storage.getLedger().length;
+  const { recommendedCategories, articles } = data;
+  const firstCat = recommendedCategories[0];
+  if (firstCat) aiNewsCache[firstCat] = articles;
 
   document.getElementById('mirrorBody').innerHTML = `
-    <div class="mirror-body">
-      <div>
-        <div class="mirror-report-label">소비 분석 리포트</div>
-        <div class="mirror-title">${data.title}</div>
-        <div class="mirror-headline">${data.headline}</div>
-      </div>
-      <div class="mirror-content">${data.content}</div>
-      <div class="mirror-advice">
-        <div class="mirror-advice-label">AI 절약 팁</div>
-        <p>${data.advice}</p>
-      </div>
-      ${ledgerCount > 0 && ledgerCount < 5 ? `
-        <p style="font-size:12px;color:var(--gray-400);padding-top:4px;">지출을 더 입력할수록 분석 정확도가 올라가요.</p>
-      ` : ''}
-      <div class="mirror-footer">
-        <span>${name}님의 분석</span>
-        <a href="ledger.html" style="color:var(--indigo-600);font-weight:600;text-decoration:none;font-size:12px;">가계부 입력 →</a>
-      </div>
+    <div class="cat-tabs" id="aiCatTabs">
+      ${recommendedCategories.map((cat, i) => `
+        <button class="cat-tab ${i === 0 ? 'active' : ''}" onclick="switchAICat(this, '${cat}')">${cat}</button>
+      `).join('')}
+    </div>
+    <div class="news-list" id="aiNewsList">
+      ${buildAINewsHtml(articles)}
     </div>
   `;
 }
@@ -155,7 +199,7 @@ async function generateMirror() {
 
   if (!ledger.length) {
     document.getElementById('mirrorBody').innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 28px;text-align:center;gap:16px;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 28px;text-align:center;gap:16px;">
         <div>
           <p style="font-size:15px;font-weight:700;color:var(--gray-800);margin-bottom:6px;letter-spacing:-0.02em;">가계부를 입력하면 분석이 시작돼요</p>
           <p style="font-size:13px;color:var(--gray-400);line-height:1.6;">지출을 3건 이상 입력하면<br>카테고리별 소비 현황을 분석해 드립니다</p>
@@ -168,7 +212,7 @@ async function generateMirror() {
   }
 
   document.getElementById('mirrorBody').innerHTML = `
-    <div class="mirror-loading">
+    <div class="mirror-loading" style="flex:1;">
       <div class="mirror-spinner"></div>
       <span>AI가 소비 내역을 분석하는 중...</span>
     </div>`;
@@ -183,6 +227,11 @@ async function generateMirror() {
   const total = Object.values(catSum).reduce((s, v) => s + v, 0);
   const topPct = top ? Math.round(top[1] / total * 100) : 0;
   const now = new Date();
+
+  const catToNews = { '식비':'음식·요리', '교통':'경제·금융', '쇼핑':'문화·엔터', '의료':'건강·운동', '통신':'IT·테크', '문화':'문화·엔터', '기타':'경제·금융' };
+  const fallbackCats = top
+    ? [catToNews[top[0]] || '경제·금융', '경제·금융', '문화·엔터'].filter((v, i, a) => a.indexOf(v) === i).slice(0, 3)
+    : ['경제·금융', '문화·엔터', '건강·운동'];
 
   try {
     const res = await fetch('/api/analyze', {
@@ -200,24 +249,21 @@ async function generateMirror() {
     const aiData = await res.json();
     if (aiData.error) throw new Error(aiData.error);
 
-    renderMirror({
-      title: `이번 달 ${name}님의 지출 분석 리포트`,
-      headline: `총 지출 ${total.toLocaleString()}원 · ${top ? `${top[0]} 비중 ${topPct}%로 1위` : '카테고리 고른 분포'}`,
-      content: aiData.pattern + ' ' + aiData.trend,
-      advice: '💡 ' + aiData.recommendation
-    });
+    const recommendedCategories = Array.isArray(aiData.recommendedCategories) && aiData.recommendedCategories.length
+      ? aiData.recommendedCategories.slice(0, 3)
+      : fallbackCats;
+
+    const newsRes = await fetch(`/api/news?category=${encodeURIComponent(recommendedCategories[0])}`);
+    const newsData = newsRes.ok ? await newsRes.json() : { articles: [] };
+
+    renderMirror({ recommendedCategories, articles: newsData.articles || [] });
   } catch (e) {
-    // AI API 실패 시 로컬 분석으로 폴백
-    renderMirror({
-      title: `이번 달 ${name}님의 지출 분석 리포트`,
-      headline: `총 지출 ${total.toLocaleString()}원 · ${top ? `${top[0]} 비중 ${topPct}%로 1위` : '카테고리 고른 분포'}`,
-      content: sorted.slice(0, 3).map(([cat, amt]) =>
-        `'${cat}' 항목에 ${amt.toLocaleString()}원 지출`
-      ).join(', ') + `이 기록되었습니다. ${top && topPct > 40 ? `특히 '${top[0]}' 지출이 전체의 ${topPct}%를 차지해 집중 관리가 필요한 구간입니다.` : '전반적으로 균형 잡힌 소비 패턴을 보이고 있습니다.'} 총 ${expenses.length}건의 지출 내역을 분석한 결과입니다.`,
-      advice: top && topPct > 35
-        ? `💡 '${top[0]}' 항목이 지출의 ${topPct}%를 차지합니다. 이번 주 하루만이라도 해당 카테고리 지출을 한 번 건너뛰어보세요. 월 기준 약 ${Math.round(top[1] * 0.2).toLocaleString()}원 절약이 가능합니다.`
-        : '💡 소비 균형이 양호합니다! 각 카테고리 예산 한도를 설정해 이 균형을 유지해보세요.'
-    });
+    let fallbackArticles = [];
+    try {
+      const newsRes = await fetch(`/api/news?category=${encodeURIComponent(fallbackCats[0])}`);
+      if (newsRes.ok) { const d = await newsRes.json(); fallbackArticles = d.articles || []; }
+    } catch (_) {}
+    renderMirror({ recommendedCategories: fallbackCats, articles: fallbackArticles });
   }
 }
 

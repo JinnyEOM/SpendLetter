@@ -26,13 +26,23 @@ export default async function handler(req, res) {
 거래 건수: ${transactions.length}건
 카테고리별 지출 (상위 3개): ${topCats}
 
-위 데이터를 바탕으로 아래 3가지를 각각 2문장 이내로 분석해주세요.
-응답은 반드시 아래 JSON 형식으로만 답하세요. 다른 텍스트 없이 JSON만 출력하세요.
+아래 JSON 형식으로만 응답하세요. 마크다운, 백틱, 설명 텍스트 없이 순수 JSON만 출력하세요.
+이모지 사용 절대 금지. 한국어로 작성하세요.
+
+제약 조건:
+- pattern, trend, recommend 는 각각 1~2개 항목 배열
+- 각 항목은 25자 이내, 핵심 수치(퍼센트·금액)를 앞에 배치
+- headline, summary 는 각 1줄
+- recommendedCategories는 아래 목록에서 3개 선택 (목록 외 텍스트 금지):
+  경제·금융, IT·테크, 건강·운동, 문화·엔터, 스포츠, 사회·정치, 부동산, 음식·요리, 여행
 
 {
-  "pattern": "소비 패턴 분석 내용",
-  "trend": "주목할 만한 지출 트렌드 내용",
-  "recommendation": "추천 뉴스 카테고리와 이유"
+  "headline": "6월은 식비 중심의 한 달이었어요",
+  "summary": "전월 대비 6% 증가",
+  "pattern": ["항목1 (25자 이내)", "항목2 (25자 이내)"],
+  "trend": ["항목1 (25자 이내)", "항목2 (25자 이내)"],
+  "recommend": ["항목1 (25자 이내)", "항목2 (25자 이내)"],
+  "recommendedCategories": ["카테고리1", "카테고리2", "카테고리3"]
 }`;
 
   try {
@@ -66,6 +76,12 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'AI 응답에서 JSON을 추출할 수 없습니다.' });
     }
     const parsed = JSON.parse(jsonMatch[0]);
+    const emojiRegex = /[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE00}-\u{FEFF}]/gu;
+    const cleanStr = (s) => typeof s === 'string' ? s.replace(emojiRegex, '').trim() : s;
+    Object.keys(parsed).forEach(k => {
+      if (typeof parsed[k] === 'string') parsed[k] = cleanStr(parsed[k]);
+      else if (Array.isArray(parsed[k])) parsed[k] = parsed[k].map(cleanStr);
+    });
     res.status(200).json(parsed);
   } catch (e) {
     res.status(500).json({ error: e.message });

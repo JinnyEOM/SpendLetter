@@ -1,5 +1,42 @@
 /* ── analysis.js · analysis 페이지 전용 스크립트 ── */
 
+let _insightExpenses = [], _insightMonth = 0, _insightYear = 0, _insightChangeText = '';
+
+function checkInsight() {
+  loadAIInsight(_insightExpenses, _insightMonth, _insightYear);
+}
+
+function buildMonthOptions() {
+  const now = new Date();
+  const ledger = Storage.getLedger();
+  const seen = new Set();
+  const options = [];
+
+  for (let i = 0; i < 13; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    const key = `${y}-${m}`;
+    if (!seen.has(key)) { seen.add(key); options.push({ year: y, month: m, key }); }
+  }
+
+  ledger.forEach(t => {
+    const d = new Date(t.date);
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    const key = `${y}-${m}`;
+    if (!seen.has(key)) { seen.add(key); options.push({ year: y, month: m, key }); }
+  });
+
+  options.sort((a, b) => a.year !== b.year ? b.year - a.year : b.month - a.month);
+  return options;
+}
+
+function parseMonthKey(key) {
+  const [y, m] = key.split('-').map(Number);
+  return { year: y, month: m };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!Storage.isLoggedIn()) { window.location.href='index.html'; return; }
   const user = Storage.getUser();
@@ -9,13 +46,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const select = document.getElementById('analysisMonth');
-  renderAnalysis(parseInt(select.value));
-  select.addEventListener('change', () => renderAnalysis(parseInt(select.value)));
+  const options = buildMonthOptions();
+  options.forEach(({ year, month, key }) => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = `${year}년 ${month}월`;
+    select.appendChild(opt);
+  });
+
+  // 기본값: 전월
+  const now = new Date();
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const defaultKey = `${prev.getFullYear()}-${prev.getMonth() + 1}`;
+  if (options.find(o => o.key === defaultKey)) select.value = defaultKey;
+
+  const { year: initYear, month: initMonth } = parseMonthKey(select.value);
+  renderAnalysis(initMonth, initYear);
+
+  select.addEventListener('change', () => {
+    const { year, month } = parseMonthKey(select.value);
+    renderAnalysis(month, year);
+  });
 });
 
-function renderAnalysis(month) {
-  const now = new Date();
-  const year = now.getFullYear();
+function renderAnalysis(month, year) {
 
   const all = Storage.getLedger();
   const data = all.filter(t => {
@@ -53,6 +107,7 @@ function renderAnalysis(month) {
   // 전월 대비
   const changeRate = prevExpense > 0 ? Math.round((totalExpense - prevExpense) / prevExpense * 100) : 0;
   const changeText = changeRate > 0 ? `↑ 전월 대비 ${changeRate}%` : changeRate < 0 ? `↓ 전월 대비 ${Math.abs(changeRate)}%` : '전월과 동일';
+  _insightChangeText = changeText;
   const changeColor = changeRate > 0 ? 'var(--error)' : changeRate < 0 ? '#059669' : 'var(--gray-400)';
 
   // KPI 업데이트
@@ -64,13 +119,34 @@ function renderAnalysis(month) {
   document.querySelector('.stat-card:nth-child(3) .stat-card-value').textContent = topCat[0] === '없음' ? '없음' : catEmoji(topCat[0]) + ' ' + topCat[0];
   document.querySelector('.stat-card:nth-child(3) .stat-card-change').textContent = topCat[1] > 0 ? '₩' + Number(topCat[1]).toLocaleString('ko-KR') : '-';
   document.querySelector('.stat-card:nth-child(4) .stat-card-value').textContent = expenses.length + '건';
+  document.querySelector('.stat-card:nth-child(4) .stat-card-change').textContent = `${month}월`;
+  const chip = document.getElementById('analysisMonthChip');
+  if (chip) chip.textContent = `${month}월`;
 
   // 도넛 차트 업데이트
   renderDonut(catSorted, totalExpense);
 
   // 주간 트렌드 업데이트
   renderWeeklyBar(expenses, month, year);
-  loadAIInsight(expenses, month, year);
+
+  // 월 변경 시 인사이트 초기 상태로 리셋
+  _insightExpenses = expenses;
+  _insightMonth = month;
+  _insightYear = year;
+  resetInsight();
+}
+
+function resetInsight() {
+  const m = _insightMonth;
+  const q = document.getElementById('insightQuestion');
+  const btn = document.getElementById('insightCheckBtn');
+  if (q) q.textContent = `${m}월엔 어디에 가장 많이 썼을까요?`;
+  if (btn) btn.textContent = `${m}월 리포트 확인하기`;
+  document.getElementById('insightSubtext').textContent = 'AI가 분석한 이달의 소비 패턴';
+  document.getElementById('insightBadge').style.display = 'none';
+  document.getElementById('insightPrompt').style.display = 'flex';
+  document.getElementById('insightLoading').style.display = 'none';
+  document.getElementById('insightResults').style.display = 'none';
 }
 
 function catEmoji(cat) {
@@ -172,21 +248,37 @@ function renderWeeklyBar(expenses, month, year) {
   });
 }
 async function loadAIInsight(transactions, month, year) {
-  const cards = [
-    document.getElementById('insightCard0'),
-    document.getElementById('insightCard1'),
-    document.getElementById('insightCard2'),
-  ];
+  document.getElementById('insightPrompt').style.display = 'none';
+  document.getElementById('insightLoading').style.display = 'flex';
+  document.getElementById('insightResults').style.display = 'none';
 
-  // 데이터 없으면 API 호출 없이 안내 표시
-  if (!transactions.length) {
-    setInsight('insightTitle0', 'insightContent0', '소비 패턴', '이번 달 지출 내역이 없습니다. 가계부에 지출을 입력하면 AI 분석이 시작됩니다.');
-    setInsight('insightTitle1', 'insightContent1', '지출 트렌드', '데이터가 쌓이면 주간·월간 지출 흐름을 분석해 드립니다.');
-    setInsight('insightTitle2', 'insightContent2', '추천 카테고리', '지출 패턴을 바탕으로 맞춤 뉴스 카테고리를 추천해 드릴게요.');
-    return;
+  // 클라이언트 데이터로 헤드라인 미리 계산
+  const catMap = {};
+  transactions.forEach(t => { catMap[t.category] = (catMap[t.category] || 0) + Number(t.amount); });
+  const topEntry = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0];
+  const topCat = topEntry ? topEntry[0] : null;
+  const headlineText = topCat ? `${month}월은 ${topCat} 중심의 한 달이었어요` : `${month}월 소비 패턴을 분석했어요`;
+  const headlineSub = _insightChangeText || '전월 데이터 없음';
+
+  function showResults() {
+    document.getElementById('insightLoading').style.display = 'none';
+    document.getElementById('insightSubtext').textContent = `${month}월 소비를 분석했어요`;
+    document.getElementById('insightBadge').style.display = 'inline-block';
+    document.getElementById('insightHeadlineText').textContent = headlineText;
+    document.getElementById('insightHeadlineSub').textContent = headlineSub;
+    document.getElementById('feedNewsBtnText').textContent = `${month}월 소비 기반 뉴스 보기`;
+    document.getElementById('insightResults').style.display = 'flex';
   }
 
-  cards.forEach(c => { if (c) c.style.opacity = '0.5'; });
+  if (!transactions.length) {
+    showResults();
+    document.getElementById('insightHeadlineText').textContent = `${month}월 지출 내역이 없습니다`;
+    document.getElementById('insightHeadlineSub').textContent = '가계부에 지출을 입력하면 AI 분석이 시작됩니다';
+    setInsight(null, 'insightContent0', null, buildBullets(['이번 달 지출 내역이 없습니다.']), true);
+    setInsight(null, 'insightContent1', null, buildBullets(['데이터가 쌓이면 분석해 드립니다.']), true);
+    setInsight(null, 'insightContent2', null, buildBullets(['지출 입력 후 다시 확인해 주세요.']), true);
+    return;
+  }
 
   try {
     const res = await fetch('/api/analyze', {
@@ -194,29 +286,37 @@ async function loadAIInsight(transactions, month, year) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ transactions, month, year })
     });
-
-    if (!res.ok && res.headers.get('content-type')?.includes('application/json') === false) {
+    if (!res.ok && !res.headers.get('content-type')?.includes('application/json')) {
       throw new Error(`API 오류: ${res.status}`);
     }
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
-    setInsight('insightTitle0', 'insightContent0', '소비 패턴', data.pattern);
-    setInsight('insightTitle1', 'insightContent1', '지출 트렌드', data.trend);
-    setInsight('insightTitle2', 'insightContent2', '추천 카테고리', data.recommendation, true);
+    showResults();
+    if (data.headline) document.getElementById('insightHeadlineText').textContent = data.headline;
+    if (data.summary) document.getElementById('insightHeadlineSub').textContent = data.summary;
+    setInsight(null, 'insightContent0', null, buildBullets(data.pattern), true);
+    setInsight(null, 'insightContent1', null, buildBullets(data.trend), true);
+    setInsight(null, 'insightContent2', null, buildBullets(data.recommend), true);
 
   } catch (e) {
-    setInsight('insightTitle0', 'insightContent0', 'AI 분석 실패', `오류: ${e.message}`);
-    setInsight('insightTitle1', 'insightContent1', '원인', '/api/analyze 호출 실패. API 키 또는 서버 상태를 확인해주세요.');
-    setInsight('insightTitle2', 'insightContent2', '해결 방법', 'Vercel 환경변수에 ANTHROPIC_API_KEY가 등록되어 있는지 확인하세요.');
+    showResults();
+    document.getElementById('insightHeadlineText').textContent = 'AI 분석에 실패했습니다';
+    document.getElementById('insightHeadlineSub').textContent = e.message;
+    setInsight(null, 'insightContent0', null, buildBullets([`오류: ${e.message}`]), true);
+    setInsight(null, 'insightContent1', null, buildBullets(['/api/analyze 호출 실패']), true);
+    setInsight(null, 'insightContent2', null, buildBullets(['ANTHROPIC_API_KEY 환경변수를 확인하세요']), true);
     console.error('AI 분석 실패:', e);
-  } finally {
-    cards.forEach(c => { if (c) c.style.opacity = '1'; });
   }
 }
 
+function buildBullets(items) {
+  if (!Array.isArray(items) || !items.length) return '';
+  return '<ul class="insight-bullets">' + items.slice(0, 2).map(item => `<li>${item}</li>`).join('') + '</ul>';
+}
+
 function setInsight(titleId, contentId, title, content, asHtml = false) {
-  const t = document.getElementById(titleId);
+  const t = titleId ? document.getElementById(titleId) : null;
   const c = document.getElementById(contentId);
   if (t) t.textContent = title;
   if (c) asHtml ? (c.innerHTML = content) : (c.textContent = content);

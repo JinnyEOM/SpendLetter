@@ -6,6 +6,33 @@
   <title>SpendLetter — 소비 분석</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
   <link rel="stylesheet" href="css/common.css">
+  <style>
+    .insight-bullets {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .insight-bullets li {
+      font-size: 13px;
+      color: var(--gray-600);
+      line-height: 1.5;
+      padding-left: 13px;
+      position: relative;
+    }
+    .insight-bullets li::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+      color: #534AB7;
+      font-weight: 800;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+    #insightCard2 .insight-bullets li { color: #7C72C4; }
+  </style>
 </head>
 <body>
 
@@ -61,10 +88,7 @@
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
         <span style="font-size:13px;color:var(--gray-400);">분석 기준월:</span>
-        <select class="app-select" style="width:140px;height:36px;font-size:13px;" id="analysisMonth">
-          <option value="6" selected>2026년 6월</option>
-          <option value="5">2026년 5월</option>
-          <option value="4">2026년 4월</option>
+        <select class="app-select" style="width:160px;height:36px;font-size:13px;" id="analysisMonth">
         </select>
       </div>
     </div>
@@ -102,7 +126,7 @@
               <div class="card-title">카테고리별 지출</div>
               <div class="card-sub">이번달 지출 분포</div>
             </div>
-            <span class="chip chip-indigo">6월</span>
+            <span class="chip chip-indigo" id="analysisMonthChip">-월</span>
           </div>
 
           <!-- SVG Donut Chart -->
@@ -194,34 +218,79 @@
       </div>
 
       <!-- AI 인사이트 -->
-      <div class="card" style="border-color:var(--indigo-100);background:linear-gradient(135deg,#F8F9FF 0%,white 100%);">
+      <div class="card" style="border-color:#E0DEFF;background:linear-gradient(135deg,#F8F7FF 0%,white 100%);">
+
+        <!-- 카드 헤더 -->
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-          <div style="width:40px;height:40px;background:var(--indigo-600);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l2 4.5H17l-4 3 1.5 4.5L10 11.5l-4.5 2.5L7 9.5 3 6.5h5L10 2z" fill="white"/></svg>
+          <div style="width:40px;height:40px;background:#534AB7;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3l1.8 5.4L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.6z"/>
+              <circle cx="19.5" cy="5.5" r="1" fill="white" stroke="none" opacity="0.8"/>
+              <circle cx="4.5" cy="18.5" r="1" fill="white" stroke="none" opacity="0.8"/>
+            </svg>
           </div>
-          <div>
+          <div style="flex:1;">
             <div style="font-size:15px;font-weight:700;color:var(--gray-800);">AI 소비 인사이트</div>
-            <div style="font-size:12px;color:var(--gray-400);">Claude AI가 분석한 이달의 소비 패턴</div>
+            <div id="insightSubtext" style="font-size:12px;color:var(--gray-400);">AI가 분석한 이달의 소비 패턴</div>
           </div>
-          <span class="chip chip-indigo" style="margin-left:auto;">AI 분석</span>
+          <span id="insightBadge" style="display:none;padding:4px 10px;background:#EDE9FF;color:#534AB7;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.01em;">분석 완료</span>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
-          <div id="insightCard0" style="background:white;border:1px solid var(--gray-200);border-radius:12px;padding:16px;">
-            <div style="font-size:20px;margin-bottom:8px;">📊</div>
-            <div id="insightTitle0" style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:6px;">식비 집중 패턴</div>
-            <div id="insightContent0" style="font-size:12px;color:var(--gray-600);line-height:1.6;">전체 지출의 40%가 식비에 집중되어 있어요. 주로 점심 시간대와 주말 저녁에 지출이 몰려 있습니다.</div>
+        <!-- 분석 전: 확인하기 -->
+        <div id="insightPrompt" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;gap:16px;text-align:center;">
+          <div>
+            <div id="insightQuestion" style="font-size:18px;font-weight:800;color:var(--gray-800);letter-spacing:-0.03em;margin-bottom:8px;line-height:1.4;"></div>
+            <div style="font-size:13px;color:var(--gray-400);line-height:1.6;">소비 패턴 · 지출 트렌드 · 맞춤 뉴스 카테고리를<br>AI가 분석해 드려요.</div>
           </div>
-          <div id="insightCard1" style="background:white;border:1px solid var(--gray-200);border-radius:12px;padding:16px;">
-            <div style="font-size:20px;margin-bottom:8px;">📈</div>
-            <div id="insightTitle1" style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:6px;">쇼핑 증가 추세</div>
-            <div id="insightContent1" style="font-size:12px;color:var(--gray-600);line-height:1.6;">지난달 대비 쇼핑 지출이 23% 증가했어요. 온라인 쇼핑몰 이용이 늘어난 것으로 보입니다.</div>
+          <button id="insightCheckBtn" onclick="checkInsight()" style="padding:11px 28px;background:#534AB7;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);transition:opacity 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'"></button>
+        </div>
+
+        <!-- 로딩 -->
+        <div id="insightLoading" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:12px;">
+          <div style="width:28px;height:28px;border:2px solid #EDE9FF;border-top-color:#534AB7;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+          <span style="font-size:13px;color:var(--gray-400);">AI가 소비 내역을 분석하는 중...</span>
+        </div>
+        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+        <!-- 분석 후: 결과 -->
+        <div id="insightResults" style="display:none;flex-direction:column;gap:14px;">
+
+          <!-- 헤드라인 박스 -->
+          <div style="background:#F0EEFF;border-radius:10px;padding:16px 20px;">
+            <div id="insightHeadlineText" style="font-size:15px;font-weight:700;color:#534AB7;letter-spacing:-0.02em;margin-bottom:4px;"></div>
+            <div id="insightHeadlineSub" style="font-size:12px;color:#7C72C4;"></div>
           </div>
-          <div id="insightCard2" style="background:white;border:1px solid var(--indigo-100);border-radius:12px;padding:16px;background:var(--indigo-50);">
-            <div style="font-size:20px;margin-bottom:8px;">💡</div>
-            <div id="insightTitle2" style="font-size:13px;font-weight:700;color:var(--indigo-700);margin-bottom:6px;">추천 뉴스 카테고리</div>
-            <div id="insightContent2" style="font-size:12px;color:var(--indigo-600);line-height:1.6;">소비 패턴을 바탕으로 <strong>음식·요리</strong>, <strong>쇼핑 트렌드</strong>, <strong>생활경제</strong> 카테고리를 추천드려요.</div>
+
+          <!-- 인사이트 카드 3개 -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+            <div id="insightCard0" style="background:white;border:1px solid var(--gray-200);border-radius:12px;padding:16px;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0-1-1h-6.8a2 2 0 0 1-2-2v-7a.9.9 0 0 0-1-.8"/><path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1-1-1v-4.5"/></svg>
+                <span style="font-size:12px;font-weight:700;color:var(--gray-700);">소비 패턴</span>
+              </div>
+              <div id="insightContent0" style="font-size:12px;color:var(--gray-600);line-height:1.6;"></div>
+            </div>
+            <div id="insightCard1" style="background:white;border:1px solid var(--gray-200);border-radius:12px;padding:16px;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                <span style="font-size:12px;font-weight:700;color:var(--gray-700);">지출 트렌드</span>
+              </div>
+              <div id="insightContent1" style="font-size:12px;color:var(--gray-600);line-height:1.6;"></div>
+            </div>
+            <div id="insightCard2" style="background:#FAFAFE;border:1px solid #E0DEFF;border-radius:12px;padding:16px;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h1m8-9v1m8 8h1m-15.4-6.4.7.7m12.1-.7-.7.7"/><path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0-1 3a2 2 0 0 1-4 0a3.5 3.5 0 0 0-1-3"/><line x1="9.7" y1="17" x2="14.3" y2="17"/></svg>
+                <span style="font-size:12px;font-weight:700;color:#534AB7;">추천 카테고리</span>
+              </div>
+              <div id="insightContent2" style="font-size:12px;color:#7C72C4;line-height:1.6;"></div>
+            </div>
           </div>
+
+          <!-- 풀와이드 뉴스 버튼 -->
+          <a id="feedNewsBtn" href="feed.html" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:#534AB7;color:white;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+            <span id="feedNewsBtnText">소비 기반 뉴스 보기</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </a>
         </div>
       </div>
     </div>
