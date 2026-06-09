@@ -2,6 +2,10 @@
 
 let _insightExpenses = [], _insightMonth = 0, _insightYear = 0, _insightChangeText = '';
 
+function ledgerHashStr(expenses) {
+  return `${expenses.length}:${expenses.reduce((s, t) => s + Number(t.amount), 0)}`;
+}
+
 function checkInsight() {
   loadAIInsight(_insightExpenses, _insightMonth, _insightYear);
 }
@@ -105,10 +109,11 @@ function renderAnalysis(month, year) {
   const topCat = catSorted[0] || ['없음', 0];
 
   // 전월 대비
-  const changeRate = prevExpense > 0 ? Math.round((totalExpense - prevExpense) / prevExpense * 100) : 0;
-  const changeText = changeRate > 0 ? `↑ 전월 대비 ${changeRate}%` : changeRate < 0 ? `↓ 전월 대비 ${Math.abs(changeRate)}%` : '전월과 동일';
+  const hasPrevData = prevExpense > 0;
+  const changeRate = hasPrevData ? Math.round((totalExpense - prevExpense) / prevExpense * 100) : null;
+  const changeText = !hasPrevData ? '이전 달 데이터 없음' : changeRate > 0 ? `↑ 전월 대비 ${changeRate}%` : changeRate < 0 ? `↓ 전월 대비 ${Math.abs(changeRate)}%` : '전월과 동일';
   _insightChangeText = changeText;
-  const changeColor = changeRate > 0 ? 'var(--error)' : changeRate < 0 ? '#059669' : 'var(--gray-400)';
+  const changeColor = !hasPrevData ? 'var(--gray-300)' : changeRate > 0 ? 'var(--error)' : changeRate < 0 ? '#059669' : 'var(--gray-400)';
 
   // KPI 업데이트
   document.querySelector('.stat-card:nth-child(1) .stat-card-value').textContent = '₩' + totalExpense.toLocaleString('ko-KR');
@@ -133,7 +138,13 @@ function renderAnalysis(month, year) {
   _insightExpenses = expenses;
   _insightMonth = month;
   _insightYear = year;
-  resetInsight();
+  const hash = ledgerHashStr(expenses);
+  const cached = Storage.getAIInsightCache(year, month);
+  if (expenses.length && cached && cached.ledgerHash === hash) {
+    applyInsightData(cached.data, month);
+  } else {
+    resetInsight();
+  }
 }
 
 function resetInsight() {
@@ -149,6 +160,23 @@ function resetInsight() {
   document.getElementById('insightResults').style.display = 'none';
 }
 
+function applyInsightData(data, month) {
+  document.getElementById('insightPrompt').style.display = 'none';
+  document.getElementById('insightLoading').style.display = 'none';
+  document.getElementById('insightSubtext').textContent = `${month}월 소비를 분석했어요`;
+  document.getElementById('insightBadge').style.display = 'inline-block';
+  document.getElementById('insightHeadlineText').textContent = data.headline || `${month}월 소비 패턴을 분석했어요`;
+  document.getElementById('insightHeadlineSub').textContent = data.summary || _insightChangeText;
+  document.getElementById('feedNewsBtnText').textContent = `${month}월 소비 기반 뉴스 보기`;
+  document.getElementById('insightResults').style.display = 'flex';
+  setInsight(null, 'insightContent0', null, buildBullets(data.pattern), true);
+  setInsight(null, 'insightContent1', null, buildBullets(data.trend), true);
+  setInsight(null, 'insightContent2', null, buildBullets(data.recommend), true);
+  if (data.recommendedCategories?.length) {
+    Storage.setAIRecommendation({ categories: data.recommendedCategories, month: _insightMonth, year: _insightYear });
+  }
+}
+
 function catEmoji(cat) {
   const map = { '식비':'🍽️', '교통':'🚇', '쇼핑':'🛍️', '문화':'🎭', '의료':'🏥', '통신':'📱', '기타':'📦', '급여':'💰' };
   return map[cat] || '📦';
@@ -160,13 +188,13 @@ function renderDonut(catSorted, total) {
   let offset = 0;
 
   // 도넛 세그먼트 업데이트
-  const circles = document.querySelectorAll('svg circle[stroke-dasharray]');
+  const circles = document.querySelectorAll('#donutSvg circle[stroke-dasharray]');
   circles.forEach((c, i) => {
     if (i === 0) { c.setAttribute('stroke', '#E5E7EB'); return; }
   });
 
   // 범례 업데이트
-  const legendEl = document.querySelector('svg').nextElementSibling;
+  const legendEl = document.getElementById('donutLegend');
   if (!legendEl) return;
 
   const top5 = catSorted.slice(0, 5);
@@ -176,23 +204,20 @@ function renderDonut(catSorted, total) {
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:8px;">
           <div style="width:10px;height:10px;border-radius:3px;background:${colors[i]};flex-shrink:0;"></div>
-          <span style="font-size:13px;color:var(--gray-700);">${catEmoji(cat)} ${cat}</span>
+          <span style="font-size:13px;color:var(--gray-700);">${cat}</span>
         </div>
         <span style="font-size:13px;font-weight:700;color:var(--gray-800);">${pct}%</span>
       </div>`;
   }).join('');
 
-  // SVG 텍스트 업데이트
-  const svgTexts = document.querySelectorAll('svg text');
-  svgTexts.forEach(t => {
-    if (t.textContent.includes('₩') && t.getAttribute('y') === '76') {
-      const val = total >= 100000 ? '₩' + Math.round(total/10000) + '만' : '₩' + total.toLocaleString();
-      t.textContent = val;
-    }
-  });
+  // 도넛 중앙 텍스트 업데이트
+  const donutTotal = document.getElementById('donutTotal');
+  if (donutTotal) {
+    donutTotal.textContent = total > 0 ? '₩' + total.toLocaleString('ko-KR') : '-';
+  }
 
   // 도넛 세그먼트 재계산
-  const segments = document.querySelectorAll('svg circle[transform]');
+  const segments = document.querySelectorAll('#donutSvg circle[transform]');
   offset = 0;
   top5.forEach(([ cat, amt ], i) => {
     if (!segments[i]) return;
@@ -212,6 +237,9 @@ function renderDonut(catSorted, total) {
 }
 
 function renderWeeklyBar(expenses, month, year) {
+  const now = new Date();
+  const isCurrentMonth = now.getFullYear() === year && now.getMonth() + 1 === month;
+
   const weeks = [0, 0, 0, 0];
   expenses.forEach(t => {
     const day = new Date(t.date).getDate();
@@ -223,8 +251,7 @@ function renderWeeklyBar(expenses, month, year) {
   const barHeight = 100;
   const baseY = 140;
 
-  const bars = document.querySelectorAll('rect[rx="6"]');
-  const labels = ['18만','16만','12만','진행중'];
+  const bars = document.querySelectorAll('#weeklyBarSvg rect[rx="6"]');
 
   weeks.forEach((w, i) => {
     const h = Math.round((w / max) * barHeight);
@@ -239,13 +266,32 @@ function renderWeeklyBar(expenses, month, year) {
     }
   });
 
-  // 값 레이블 업데이트
-  const valueTexts = document.querySelectorAll('svg text[font-weight="700"]');
+  // 1-3주 값 레이블
+  const valueTexts = document.querySelectorAll('#weeklyBarSvg text[font-weight="700"]');
   weeks.forEach((w, i) => {
+    if (i === 3) return;
     if (!valueTexts[i]) return;
     const label = w >= 10000 ? Math.round(w / 10000) + '만' : w > 0 ? '₩' + w.toLocaleString() : '-';
     valueTexts[i].textContent = label;
   });
+
+  // 4주 레이블: 현재 월이면 "진행중", 과거 월이면 실제 값
+  const week4ValueEl = document.getElementById('week4ValueText');
+  if (week4ValueEl) {
+    if (isCurrentMonth) {
+      week4ValueEl.textContent = '진행중';
+      week4ValueEl.setAttribute('fill', '#9CA3AF');
+      week4ValueEl.removeAttribute('font-weight');
+      if (bars[6]) bars[6].setAttribute('opacity', '0.3');
+    } else {
+      const w4 = weeks[3];
+      const label4 = w4 >= 10000 ? Math.round(w4 / 10000) + '만' : w4 > 0 ? '₩' + w4.toLocaleString() : '-';
+      week4ValueEl.textContent = label4;
+      week4ValueEl.setAttribute('fill', '#4F46E5');
+      week4ValueEl.setAttribute('font-weight', '700');
+      if (bars[6]) bars[6].setAttribute('opacity', '1');
+    }
+  }
 }
 async function loadAIInsight(transactions, month, year) {
   document.getElementById('insightPrompt').style.display = 'none';
@@ -298,6 +344,10 @@ async function loadAIInsight(transactions, month, year) {
     setInsight(null, 'insightContent0', null, buildBullets(data.pattern), true);
     setInsight(null, 'insightContent1', null, buildBullets(data.trend), true);
     setInsight(null, 'insightContent2', null, buildBullets(data.recommend), true);
+    if (data.recommendedCategories?.length) {
+      Storage.setAIRecommendation({ categories: data.recommendedCategories, month, year });
+    }
+    Storage.setAIInsightCache(year, month, data, ledgerHashStr(transactions));
 
   } catch (e) {
     showResults();

@@ -1,3 +1,25 @@
+import https from 'https';
+
+function httpsPost(url, headers, body) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(body);
+    const parsed = new URL(url);
+    const req = https.request({
+      hostname: parsed.hostname,
+      path: parsed.pathname,
+      method: 'POST',
+      headers: { ...headers, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) }
+    }, (res) => {
+      let raw = '';
+      res.on('data', chunk => raw += chunk);
+      res.on('end', () => resolve({ status: res.statusCode, body: raw }));
+    });
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -46,30 +68,19 @@ export default async function handler(req, res) {
 }`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 500,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+    const result = await httpsPost(
+      'https://api.anthropic.com/v1/messages',
+      { 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      { model: 'claude-haiku-4-5-20251001', max_tokens: 500, messages: [{ role: 'user', content: prompt }] }
+    );
 
-    if (!response.ok) {
-      let message = `Anthropic API 오류 (${response.status})`;
-      try {
-        const errData = await response.json();
-        message = errData.error?.message || message;
-      } catch (_) {}
-      return res.status(response.status).json({ error: message });
+    if (result.status !== 200) {
+      let message = `Anthropic API 오류 (${result.status})`;
+      try { message = JSON.parse(result.body).error?.message || message; } catch (_) {}
+      return res.status(result.status).json({ error: message });
     }
 
-    const data = await response.json();
+    const data = JSON.parse(result.body);
     const rawText = data.content?.[0]?.text ?? '';
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {

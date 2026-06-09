@@ -57,7 +57,7 @@
     <div class="page-header">
       <div>
         <h1>카테고리 관리</h1>
-        <div class="page-header-sub">내 뉴스 카테고리를 설정해요 (최대 3개)</div>
+        <div class="page-header-sub">이번달 받아볼 뉴스 카테고리를 확정하세요 (최대 3개)</div>
       </div>
       <button class="btn-sm btn-sm-primary" onclick="saveCategories()">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -67,62 +67,78 @@
 
     <div class="page-body">
 
-      <!-- AI 추천 배너 -->
-      <div style="background:linear-gradient(135deg,var(--indigo-600) 0%,#7C3AED 100%);border-radius:16px;padding:24px 28px;margin-bottom:28px;color:white;">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+      <!-- ── 영역 1: 직접 선택 (실제 확정) ── -->
+      <div style="margin-bottom:28px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:15px;font-weight:700;color:var(--gray-800);">내 선호 카테고리</span>
+          </div>
+          <button
+            onclick="pickRandom()"
+            style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--gray-100);border:1.5px solid var(--gray-200);border-radius:8px;font-size:12px;font-weight:600;color:var(--gray-600);cursor:pointer;font-family:var(--font);transition:all 0.2s;"
+            onmouseover="this.style.background='var(--gray-200)'"
+            onmouseout="this.style.background='var(--gray-100)'"
+          >
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 4h9M2 9h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M9 2l2 2-2 2M4 7l-2 2 2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            고르기 어렵다면? 랜덤 추천
+          </button>
+        </div>
+
+        <div class="grid-2">
+          <!-- 현재 선택 -->
           <div>
-            <div style="font-size:11px;font-weight:600;opacity:0.7;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;">✨ AI 분석 결과</div>
-            <div style="font-size:16px;font-weight:700;margin-bottom:4px;">소비 패턴 기반 추천 카테고리</div>
-            <div style="font-size:13px;opacity:0.75;">6월 소비 데이터 분석 완료 · 매달 1일 자동 업데이트</div>
+            <div style="font-size:12px;font-weight:700;color:var(--gray-400);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;padding:0 4px;">
+              현재 선택된 카테고리 <span id="selCount" style="color:var(--indigo-600);">0</span>/3
+            </div>
+            <div id="selectedList" style="display:flex;flex-direction:column;gap:10px;min-height:80px;"></div>
+            <div id="emptySelected" style="display:none;padding:32px;text-align:center;border:2px dashed var(--gray-200);border-radius:14px;color:var(--gray-400);font-size:14px;">
+              오른쪽에서 카테고리를 선택해주세요
+            </div>
           </div>
-          <button onclick="applyAIRecommendation()" style="padding:10px 20px;background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.3);border-radius:10px;font-size:13px;font-weight:600;color:white;cursor:pointer;backdrop-filter:blur(4px);font-family:var(--font);transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">AI 추천 적용하기</button>
-        </div>
-        <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
-          <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 16px;backdrop-filter:blur(4px);">
-            <div style="font-size:20px;margin-bottom:4px;">📈</div>
-            <div style="font-size:12px;font-weight:700;">경제·금융</div>
-            <div style="font-size:11px;opacity:0.7;">소비의 35% 연관</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 16px;backdrop-filter:blur(4px);">
-            <div style="font-size:20px;margin-bottom:4px;">🍽️</div>
-            <div style="font-size:12px;font-weight:700;">음식·요리</div>
-            <div style="font-size:11px;opacity:0.7;">소비의 28% 연관</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 16px;backdrop-filter:blur(4px);">
-            <div style="font-size:20px;margin-bottom:4px;">💻</div>
-            <div style="font-size:12px;font-weight:700;">IT·테크</div>
-            <div style="font-size:11px;opacity:0.7;">소비의 22% 연관</div>
+
+          <!-- 전체 카테고리 -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--gray-400);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;padding:0 4px;">전체 카테고리</div>
+            <div class="category-grid" id="allCategoryGrid" style="grid-template-columns:repeat(3,1fr);"></div>
           </div>
         </div>
       </div>
 
-      <div class="grid-2">
-        <!-- 현재 선택 -->
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--gray-400);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;padding:0 4px;">
-            현재 선택된 카테고리 <span id="selCount" style="color:var(--indigo-600);">0</span>/3
-          </div>
-          <div id="selectedList" style="display:flex;flex-direction:column;gap:10px;min-height:80px;">
-            <!-- rendered by JS -->
-          </div>
-          <div id="emptySelected" style="display:none;padding:32px;text-align:center;border:2px dashed var(--gray-200);border-radius:14px;color:var(--gray-400);font-size:14px;">
-            오른쪽에서 카테고리를 선택해주세요
-          </div>
+      <!-- ── 구분선 ── -->
+      <div style="height:1px;background:var(--gray-200);margin-bottom:28px;"></div>
+
+      <!-- ── 영역 2: 소비 분석 결과 (읽기 전용) ── -->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <span style="font-size:15px;font-weight:700;color:var(--gray-800);">소비 분석 결과</span>
         </div>
 
-        <!-- 전체 카테고리 -->
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--gray-400);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;padding:0 4px;">전체 카테고리</div>
-          <div class="category-grid" id="allCategoryGrid" style="grid-template-columns:repeat(3,1fr);">
+        <div style="background:linear-gradient(135deg,var(--indigo-600) 0%,#7C3AED 100%);border-radius:16px;padding:24px 28px;color:white;">
+          <div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px;">가계부 기반 AI 추천 카테고리</div>
+            <div id="aiBannerMonth" style="font-size:13px;opacity:0.75;"></div>
+          </div>
+
+          <!-- 추천 카테고리 카드 -->
+          <div id="aiBannerCats" style="display:none;gap:12px;margin-top:20px;flex-wrap:wrap;"></div>
+
+          <!-- 분석 결과 없을 때 -->
+          <div id="aiBannerNoData" style="display:none;margin-top:16px;">
+            <p style="font-size:13px;opacity:0.8;margin-bottom:12px;">아직 소비 분석을 하지 않았어요.<br>소비 분석 페이지에서 AI 리포트를 확인하면 여기에 자동으로 표시돼요.</p>
+            <a href="analysis.html" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.3);border-radius:10px;font-size:13px;font-weight:600;color:white;text-decoration:none;backdrop-filter:blur(4px);">
+              소비 분석 하러 가기
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5h8M7 3l3.5 3.5L7 10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
           </div>
         </div>
       </div>
+
     </div>
   </main>
 </div>
 
 <!-- Toast -->
-<div id="toast" style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gray-800);color:white;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:500;opacity:0;transition:all 0.3s;z-index:300;pointer-events:none;">저장됐어요 ✓</div>
+<div id="toast" style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gray-800);color:white;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:500;opacity:0;transition:all 0.3s;z-index:300;pointer-events:none;">저장됐어요</div>
 
   <script src="js/storage.js"></script>
   <script src="js/pages/category.js"></script>

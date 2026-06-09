@@ -120,8 +120,8 @@
 
       <div class="grid-2" style="margin-bottom:24px;">
         <!-- 카테고리별 지출 -->
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div class="card" style="display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
             <div>
               <div class="card-title">카테고리별 지출</div>
               <div class="card-sub">이번달 지출 분포</div>
@@ -130,8 +130,8 @@
           </div>
 
           <!-- SVG Donut Chart -->
-          <div style="display:flex;align-items:center;gap:24px;">
-            <svg viewBox="0 0 160 160" width="160" height="160" style="flex-shrink:0;">
+          <div style="flex:1;display:flex;align-items:center;gap:24px;">
+            <svg id="donutSvg" viewBox="0 0 160 160" width="160" height="160" style="flex-shrink:0;">
               <!-- Donut segments (식비 40%, 교통 10%, 쇼핑 30%, 문화 12%, 기타 8%) -->
               <circle cx="80" cy="80" r="60" fill="none" stroke="#E5E7EB" stroke-width="24"/>
               <!-- 식비 40% -->
@@ -149,11 +149,11 @@
               <!-- 기타 8% -->
               <circle cx="80" cy="80" r="60" fill="none" stroke="#FCD34D" stroke-width="24"
                 stroke-dasharray="30.2 346.8" stroke-dashoffset="-346.8" transform="rotate(-90 80 80)"/>
-              <text x="80" y="76" text-anchor="middle" font-size="14" font-weight="800" fill="#1F2937" font-family="Pretendard,sans-serif">₩412K</text>
+              <text id="donutTotal" x="80" y="76" text-anchor="middle" font-size="14" font-weight="800" fill="#1F2937" font-family="Pretendard,sans-serif">-</text>
               <text x="80" y="92" text-anchor="middle" font-size="10" fill="#9CA3AF" font-family="Pretendard,sans-serif">총 지출</text>
             </svg>
 
-            <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
+            <div id="donutLegend" style="flex:1;display:flex;flex-direction:column;gap:10px;">
               <div style="display:flex;align-items:center;justify-content:space-between;">
                 <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:3px;background:#4F46E5;flex-shrink:0;"></div><span style="font-size:13px;color:var(--gray-700);">🍽️ 식비</span></div>
                 <span style="font-size:13px;font-weight:700;color:var(--gray-800);">40%</span>
@@ -184,7 +184,7 @@
             <div class="card-title">주간 지출 트렌드</div>
             <div class="card-sub">이번달 주별 지출 추이</div>
           </div>
-          <svg viewBox="0 0 320 180" width="100%" style="overflow:visible;">
+          <svg id="weeklyBarSvg" viewBox="0 0 320 180" width="100%" style="overflow:visible;">
             <!-- Grid lines -->
             <line x1="40" y1="20" x2="300" y2="20" stroke="#F3F4F6" stroke-width="1"/>
             <line x1="40" y1="60" x2="300" y2="60" stroke="#F3F4F6" stroke-width="1"/>
@@ -212,7 +212,7 @@
             <text x="88" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#4F46E5" font-family="Pretendard">18만</text>
             <text x="158" y="65" text-anchor="middle" font-size="9" font-weight="700" fill="#4F46E5" font-family="Pretendard">16만</text>
             <text x="228" y="85" text-anchor="middle" font-size="9" font-weight="700" fill="#4F46E5" font-family="Pretendard">12만</text>
-            <text x="298" y="115" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="Pretendard">진행중</text>
+            <text id="week4ValueText" x="298" y="115" text-anchor="middle" font-size="9" fill="#9CA3AF" font-family="Pretendard">진행중</text>
           </svg>
         </div>
       </div>

@@ -106,5 +106,33 @@ const Storage = {
   setLastAnalysis(date) { localStorage.setItem('sl_last_analysis', date); },
   getLastAnalysis() { return localStorage.getItem('sl_last_analysis'); },
   setEmailSubscription(value) { localStorage.setItem('sl_email_subscription', value ? 'true' : 'false'); },
-  getEmailSubscription() { return localStorage.getItem('sl_email_subscription') === 'true'; }
+  getEmailSubscription() { return localStorage.getItem('sl_email_subscription') === 'true'; },
+
+  setAIRecommendation(data) { localStorage.setItem('sl_ai_recommendation', JSON.stringify(data)); },
+  getAIRecommendation() {
+    const d = localStorage.getItem('sl_ai_recommendation');
+    return d ? JSON.parse(d) : null;
+  },
+
+  setAIInsightCache(year, month, data, ledgerHash) {
+    localStorage.setItem(`sl_ai_insight:${year}-${month}`, JSON.stringify({ data, ledgerHash }));
+  },
+  getAIInsightCache(year, month) {
+    const d = localStorage.getItem(`sl_ai_insight:${year}-${month}`);
+    return d ? JSON.parse(d) : null;
+  },
+
+  setNewsCache(category, articles) {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem(`sl_news:${today}:${category}`, JSON.stringify(articles));
+  },
+  getNewsCache(category) {
+    const today = new Date().toISOString().slice(0, 10);
+    const d = localStorage.getItem(`sl_news:${today}:${category}`);
+    return d ? JSON.parse(d) : null;
+  },
+  clearNewsCache(category) {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.removeItem(`sl_news:${today}:${category}`);
+  }
 };

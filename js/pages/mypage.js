@@ -4,12 +4,14 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 function openChangeEmailModal() { document.getElementById('emailModal').classList.add('open'); }
 function openChangePwModal() { document.getElementById('pwModal').classList.add('open'); }
 
-function showToast(msg) {
+let _toastTimer = null;
+function showToast(msg, duration = 2000) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.style.opacity='1';
   t.style.transform='translateX(-50%) translateY(0)';
-  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; }, 2000);
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; }, duration);
 }
 
 function saveEmail() {
@@ -98,12 +100,7 @@ async function sendNewsletterNow() {
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   const todayDate = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일 ${days[today.getDay()]}요일`;
 
-  const categoryMap = {
-    '경제': '경제·금융', 'IT': 'IT·테크', '부동산': '부동산',
-    '건강': '건강·운동', '음식': '음식·요리', '여행': '여행',
-    '문화': '문화·엔터', '스포츠': '스포츠', '사회': '사회·정치'
-  };
-  const categoriesStr = cats.map(c => categoryMap[c] || c).join(', ');
+  const categoriesStr = cats.join(', ');
 
   showToast('발송 중...');
 
@@ -124,9 +121,10 @@ async function sendNewsletterNow() {
     if (res.ok) {
       showToast('이메일이 발송됐어요 ✓');
     } else {
-      showToast('발송에 실패했어요. 다시 시도해주세요');
+      const errData = await res.json().catch(() => ({}));
+      showToast(errData.error || '발송에 실패했어요', 4000);
     }
   } catch (e) {
-    showToast('발송에 실패했어요. 다시 시도해주세요');
+    showToast('네트워크 오류: ' + e.message, 4000);
   }
 }
