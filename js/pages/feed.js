@@ -8,27 +8,19 @@ function timeAgo(isoStr) {
   return Math.floor(diff / 1440) + '일 전';
 }
 
-// ── 분석 정확도 바 ──
-function updateSynergy() {
-  const count = Storage.getLedger().length;
-  let pct = 10;
-  if (count >= 3)  pct = 40;
-  if (count >= 8)  pct = 75;
-  if (count >= 15) pct = 100;
-  document.getElementById('synergyFill').style.width = pct + '%';
-  document.getElementById('synergyPct').textContent = pct + '%';
+// ── 썸네일 렌더 ──
+function renderThumb(imageUrl) {
+  const icon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="#9CA3AF" stroke-width="1.5"/><circle cx="5.5" cy="7.5" r="1.5" fill="#9CA3AF"/><path d="M1 11l4-3 3 2.5 2.5-3.5L15 11.5" stroke="#9CA3AF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  if (imageUrl) {
+    return `<div class="news-rank-thumb"><img src="${imageUrl}" alt="" loading="lazy" onerror="this.remove()"></div>`;
+  }
+  return `<div class="news-rank-thumb">${icon}</div>`;
 }
 
 // ── 뉴스 항목 렌더 (네이버 랭킹 스타일) ──
 function renderNewsItem(article, index) {
-  const numColor = index < 3 ? 'var(--indigo-600)' : 'var(--gray-400)';
-  const numWeight = index < 3 ? '800' : '700';
-  const thumb = article.image
-    ? `<img src="${article.image}" alt="" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;" loading="lazy" onerror="this.remove()">`
-    : '';
-
   return `<a href="${article.url}" target="_blank" rel="noopener noreferrer" class="news-rank-item">
-    <span class="news-rank-num" style="color:${numColor};font-weight:${numWeight};">${index + 1}</span>
+    <span class="news-rank-num">${index + 1}</span>
     <div class="news-rank-content">
       <div class="news-rank-title">${article.title}</div>
       <div class="news-rank-time">
@@ -36,7 +28,7 @@ function renderNewsItem(article, index) {
         ${timeAgo(article.publishedAt)}
       </div>
     </div>
-    ${thumb}
+    ${renderThumb(article.image)}
   </a>`;
 }
 
@@ -66,22 +58,33 @@ function renderCategoryCard(cat, articles, isAI = false) {
   </div>`;
 }
 
-// ── 카드 더보기 (5→전체 확장) ──
+// ── 카드 더보기/접기 토글 ──
 function expandCard(btn) {
   const card = btn.closest('.news-card');
-  const cat = card.dataset.cat;
-  const cached = Storage.getNewsCache(cat);
-
-  if (cached && cached.length > 5) {
-    const list = card.querySelector('.news-rank-list');
-    list.insertAdjacentHTML('beforeend',
-      cached.slice(5).map((a, i) => renderNewsItem(a, i + 5)).join('')
-    );
-  }
+  const isExpanded = card.dataset.expanded === '1';
+  const list = card.querySelector('.news-rank-list');
   const foot = card.querySelector('.news-card-foot');
-  if (foot) foot.style.display = 'none';
+  const footBtn = foot?.querySelector('.expand-btn');
   const headBtn = card.querySelector('.news-card-head .expand-btn');
-  if (headBtn) headBtn.style.display = 'none';
+
+  if (isExpanded) {
+    Array.from(list.querySelectorAll('.news-rank-item')).forEach((el, i) => {
+      if (i >= 5) el.remove();
+    });
+    card.dataset.expanded = '0';
+    if (footBtn) footBtn.textContent = '더보기';
+    if (headBtn) headBtn.style.display = '';
+  } else {
+    const cached = Storage.getNewsCache(card.dataset.cat);
+    if (cached && cached.length > 5) {
+      list.insertAdjacentHTML('beforeend',
+        cached.slice(5).map((a, i) => renderNewsItem(a, i + 5)).join('')
+      );
+    }
+    card.dataset.expanded = '1';
+    if (footBtn) footBtn.textContent = '접기';
+    if (headBtn) headBtn.style.display = 'none';
+  }
 }
 
 // ── 카드 로딩 + 렌더 ──
@@ -212,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('feedDate').textContent =
     now.getFullYear() + '년 ' + (now.getMonth() + 1) + '월 ' + now.getDate() + '일 맞춤 뉴스';
 
-  updateSynergy();
   renderUserSection(Storage.getCategories());
   renderAISection();
 });
