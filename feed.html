@@ -7,228 +7,143 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
   <link rel="stylesheet" href="css/common.css">
   <style>
-    .feed-split {
+    /* ── 섹션 헤더 ── */
+    .section-head { margin-bottom: 20px; }
+    .section-title { font-size: 15px; font-weight: 700; color: var(--gray-800); letter-spacing: -0.02em; }
+    .section-sub { font-size: 12px; color: var(--gray-400); margin-top: 3px; }
+
+    /* ── 3단 그리드 ── */
+    .news-cards-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      align-items: stretch;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
     }
 
-    .feed-panel {
+    /* ── 카테고리 카드 ── */
+    .news-card {
       background: white;
-      border: 1px solid var(--gray-200);
-      border-radius: 12px;
+      border: 0.5px solid var(--gray-200);
+      border-radius: 14px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      min-height: 600px;
+      height: 100%;
     }
-  
-    .feed-panel-head {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--gray-100);
+
+    .news-card-loading {
+      min-height: 220px;
+    }
+
+    /* ── 카드 헤더 ── */
+    .news-card-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--gray-100);
     }
-  
-    .feed-panel-title {
-      font-size: 15px;
+
+    .news-card-cat {
+      font-size: 13px;
       font-weight: 700;
       color: var(--gray-800);
-      letter-spacing: -0.02em;
-    }
-  
-    .feed-panel-sub {
-      font-size: 12px;
-      color: var(--gray-400);
-      margin-top: 4px;
-    }
-  
-    .cat-tabs {
-      display: flex;
-      padding: 0 24px;
-      border-bottom: 1px solid var(--gray-100);
-      overflow-x: auto;
-      gap: 0;
-      scrollbar-width: none;
+      letter-spacing: -0.01em;
     }
 
-    .cat-tabs::-webkit-scrollbar {
-      display: none;
-    }
-  
-    .cat-tab {
-      padding: 12px 16px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--gray-400);
-      cursor: pointer;
-      border: none;
-      border-bottom: 2px solid transparent;
-      white-space: nowrap;
-      transition: color 0.15s, border-color 0.15s;
-      background: none;
-      font-family: var(--font);
-    }
-  
-    .cat-tab:hover {
-      color: var(--gray-600);
-    }
-  
-    .cat-tab.active {
-      color: var(--indigo-600);
-      border-bottom-color: var(--indigo-600);
-    }
-  
-    .news-list {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      overflow-y: auto;
+    /* ── AI 뱃지 ── */
+    .ai-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      background: var(--indigo-600);
+      color: white;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
     }
 
-    #mirrorBody {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    /* ── 랭킹 리스트 ── */
+    .news-rank-list { flex: 1; }
 
-    #aiNewsList {
-      flex: 1;
-      overflow-y: auto;
-    }
-  
-    .news-list-item {
-      padding: 16px 24px;
-      border-bottom: 1px solid var(--gray-100);
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-  
-    .news-list-item:last-child {
-      border-bottom: none;
-    }
-  
-    .news-list-item:hover {
-      background: var(--gray-50);
-    }
-  
-    .news-list-meta {
+    .news-rank-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
+      gap: 10px;
+      padding: 11px 20px;
+      border-bottom: 1px solid var(--gray-50);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.12s;
     }
-  
-    .news-list-item h3 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--gray-800);
-      letter-spacing: -0.02em;
-      line-height: 1.5;
-      margin-bottom: 6px;
+
+    .news-rank-item:last-child { border-bottom: none; }
+    .news-rank-item:hover { background: var(--gray-50); }
+
+    .news-rank-num {
+      width: 18px;
+      font-size: 15px;
+      text-align: center;
+      flex-shrink: 0;
+      line-height: 1;
     }
-  
-    .news-list-item p {
+
+    .news-rank-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .news-rank-title {
       font-size: 13px;
-      color: var(--gray-600);
-      line-height: 1.6;
-      overflow: hidden;
+      font-weight: 600;
+      color: var(--gray-800);
+      line-height: 1.5;
       display: -webkit-box;
-      -webkit-box-orient: vertical; /* stylelint-disable-line */
       -webkit-line-clamp: 2;
       line-clamp: 2;
-    }
-  
-    .news-list-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 10px;
-    }
-  
-    .save-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--gray-400);
-      font-size: 12px;
-      font-family: var(--font);
-      transition: color 0.15s;
-      padding: 0;
-    }
-  
-    .save-btn:hover {
-      color: var(--error);
-    }
-  
-    .mirror-body {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .mirror-report-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--indigo-500);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      -webkit-box-orient: vertical; /* stylelint-disable-line */
+      overflow: hidden;
+      letter-spacing: -0.01em;
       margin-bottom: 4px;
     }
 
-    .mirror-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--gray-800);
-      letter-spacing: -0.03em;
+    .news-rank-time {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      color: var(--gray-400);
+      line-height: 1;
+    }
+
+    /* ── 카드 푸터 ── */
+    .news-card-foot {
+      padding: 11px 20px;
+      border-top: 1px solid var(--gray-100);
+      text-align: center;
+    }
+
+    .expand-btn {
+      background: none;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--indigo-500);
+      cursor: pointer;
+      font-family: var(--font);
+      padding: 0;
+      transition: color 0.15s;
       line-height: 1.4;
     }
 
-    .mirror-headline {
+    .expand-btn:hover { color: var(--indigo-700); }
+
+    /* ── 빈 상태 / 로딩 ── */
+    .news-empty {
+      padding: 40px 20px;
+      text-align: center;
       font-size: 13px;
       color: var(--gray-400);
-      line-height: 1.6;
-      margin-top: 4px;
-    }
-
-    .mirror-content {
-      font-size: 13px;
-      color: var(--gray-600);
-      line-height: 1.8;
-      padding-top: 12px;
-      border-top: 1px solid var(--gray-100);
-    }
-
-    .mirror-advice {
-      padding-top: 12px;
-      border-top: 1px solid var(--gray-100);
-    }
-
-    .mirror-advice-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--gray-800);
-      margin-bottom: 6px;
-    }
-
-    .mirror-advice p {
-      font-size: 13px;
-      color: var(--gray-600);
       line-height: 1.7;
-    }
-
-    .mirror-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 12px;
-      border-top: 1px solid var(--gray-100);
-      font-size: 12px;
-      color: var(--gray-400);
     }
 
     .mirror-loading {
@@ -236,15 +151,15 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      padding: 48px 24px;
+      gap: 10px;
+      padding: 48px 20px;
       color: var(--gray-400);
       font-size: 13px;
     }
 
     .mirror-spinner {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       border: 2px solid var(--indigo-100);
       border-top-color: var(--indigo-500);
       border-radius: 50%;
@@ -252,7 +167,8 @@
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
-  
+
+    /* ── 분석 정확도 바 ── */
     .synergy-bar {
       background: white;
       border-bottom: 1px solid var(--gray-200);
@@ -261,7 +177,7 @@
       align-items: center;
       gap: 16px;
     }
-  
+
     .synergy-label {
       font-size: 12px;
       color: var(--gray-600);
@@ -269,11 +185,9 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
-  
-    .synergy-label strong {
-      color: var(--indigo-600);
-    }
-  
+
+    .synergy-label strong { color: var(--indigo-600); }
+
     .synergy-track {
       flex: 1;
       max-width: 200px;
@@ -282,14 +196,14 @@
       border-radius: 100px;
       overflow: hidden;
     }
-  
+
     .synergy-fill {
       height: 100%;
       background: var(--indigo-500);
       border-radius: 100px;
       transition: width 0.6s ease;
     }
-  
+
     .synergy-pct {
       font-size: 12px;
       font-weight: 700;
@@ -297,11 +211,13 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
-  
-    @media (max-width: 900px) {
-      .feed-split {
-        grid-template-columns: 1fr;
-      }
+
+    /* ── 반응형 ── */
+    @media (max-width: 960px) {
+      .news-cards-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .news-cards-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -382,50 +298,27 @@
 
     <div class="page-body">
 
-      <!-- 2분할 메인 영역 -->
-      <div class="feed-split">
-
-        <!-- ── 좌측: 맞춤 뉴스 ── -->
-        <div class="feed-panel">
-          <div class="feed-panel-head">
-            <div>
-              <div class="feed-panel-title">맞춤 뉴스</div>
-              <div class="feed-panel-sub">선호 카테고리 기반 · 오늘의 뉴스</div>
-            </div>
-            <a href="category.html" style="font-size:13px;color:var(--indigo-600);font-weight:600;text-decoration:none;">카테고리 설정
-              →</a>
-          </div>
-
-          <!-- 카테고리 탭 -->
-          <div class="cat-tabs" id="catTabs"></div>
-
-          <!-- 뉴스 리스트 -->
-          <div class="news-list" id="newsList"></div>
+      <!-- ── 영역 1: 선호 카테고리 뉴스 ── -->
+      <div style="margin-bottom:32px;">
+        <div class="section-head">
+          <div class="section-title">선호 카테고리 뉴스</div>
+          <div class="section-sub">내가 선택한 카테고리 기반</div>
         </div>
-
-        <!-- ── 우측: AI 추천 뉴스 ── -->
-        <div class="feed-panel">
-          <div class="feed-panel-head">
-            <div>
-              <div class="feed-panel-title">AI 추천 뉴스</div>
-              <div class="feed-panel-sub">소비 패턴 분석 기반 · AI 자동 추천</div>
-            </div>
-            <a href="analysis.html" style="font-size:13px;color:var(--indigo-600);font-weight:600;text-decoration:none;">소비 분석 →</a>
-          </div>
-
-          <!-- AI 카테고리 탭 -->
-          <div class="cat-tabs" id="aiCatTabs"></div>
-
-          <!-- AI 뉴스 리스트 -->
-          <div class="news-list" id="aiNewsList">
-            <div class="mirror-loading">
-              <div class="mirror-spinner"></div>
-              <span>소비 데이터를 분석하고 있어요...</span>
-            </div>
-          </div>
-        </div>
-
+        <div class="news-cards-grid" id="userCatGrid"></div>
       </div>
+
+      <!-- ── 구분선 ── -->
+      <div style="height:1px;background:var(--gray-200);margin-bottom:32px;"></div>
+
+      <!-- ── 영역 2: AI 추천 카테고리 뉴스 ── -->
+      <div>
+        <div class="section-head">
+          <div class="section-title">AI 추천 카테고리 뉴스</div>
+          <div class="section-sub" id="aiSectionSub">소비 분석 기반 · AI 자동 선정</div>
+        </div>
+        <div class="news-cards-grid" id="aiCatGrid"></div>
+      </div>
+
     </div>
   </main>
 </div>
