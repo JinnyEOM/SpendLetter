@@ -1,4 +1,405 @@
 @charset "UTF-8";
 
-/* index.html (랜딩 페이지) 추가 스타일 */
-/* 모든 스타일이 common.css에 포함되어 있습니다. */
+/* ── 랜딩 페이지 전용 네비게이션 ── */
+
+/* nav-inner 내부 좌우 분리 */
+#mainNav .nav-inner {
+  justify-content: space-between;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* 인라인 nav 링크 (Maily 스타일) */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-link {
+  padding: 7px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-600);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-link:hover {
+  background: var(--gray-100);
+  color: var(--gray-800);
+}
+
+.nav-link.active {
+  background: var(--indigo-50);
+  color: var(--indigo-700);
+  font-weight: 600;
+}
+
+/* 우측 인증 링크 */
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-auth-login {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-600);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-auth-login:hover { color: var(--indigo-600); }
+
+
+/* ── 히어로 중앙 정렬 (메일리 스타일) ── */
+.hero-inner-centered {
+  grid-template-columns: 1fr;
+  max-width: 760px;
+  text-align: center;
+  gap: 0;
+}
+
+.hero-inner-centered .hero-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-headline {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  color: var(--gray-800);
+  margin: 0 0 18px;
+}
+
+.hero-headline em {
+  font-style: normal;
+  color: var(--indigo-600);
+}
+
+.hero-sub {
+  font-size: 22px;
+  color: var(--gray-500);
+  line-height: 1.55;
+  margin-bottom: 36px;
+  font-weight: 400;
+}
+
+/* ── 마퀴 기능 칩 ── */
+.marquee {
+  overflow: hidden;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+  mask-image:         linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  margin-bottom: 10px;
+}
+
+.marquee-track:last-child { margin-bottom: 0; }
+
+.marquee-set {
+  display: flex;
+  gap: 10px;
+  padding-right: 10px; /* 세트 간 gap 일치 */
+  flex-shrink: 0;
+}
+
+.marquee-left  { animation: marqueeLeft  32s linear infinite; }
+.marquee-right { animation: marqueeRight 28s linear infinite; }
+
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+@keyframes marqueeLeft {
+  to { transform: translateX(calc(-100% / 3)); }
+}
+
+@keyframes marqueeRight {
+  from { transform: translateX(calc(-100% / 3)); }
+  to   { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; width: 100%; flex-wrap: wrap; justify-content: center; }
+  .marquee-set:not(:first-child) { display: none; }
+  .marquee { -webkit-mask-image: none; mask-image: none; overflow-x: auto; }
+  .marquee-set { flex-wrap: wrap; justify-content: center; padding-right: 0; }
+}
+
+.hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 26px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 100px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--gray-700);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  letter-spacing: -0.01em;
+}
+
+.hero-chip svg { flex-shrink: 0; width: 16px; height: 16px; }
+
+/* ── CTA 영역 ── */
+.hero-cta-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.hero-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 16px 44px;
+  background: var(--indigo-600);
+  color: white;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(79,70,229,0.3);
+}
+
+.hero-cta-btn:hover {
+  background: var(--indigo-700);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(79,70,229,0.4);
+}
+
+.hero-trust {
+  font-size: 12px;
+  color: var(--gray-400);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* ── HOW IT WORKS 3단 카드 ── */
+.how-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.how-card {
+  position: relative;
+  background: white;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 18px;
+  padding: 32px 28px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.how-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+.how-card-featured {
+  border: 2px solid var(--indigo-600);
+  box-shadow: 0 4px 20px rgba(79,70,229,0.12);
+}
+
+.how-card-featured:hover {
+  box-shadow: 0 10px 32px rgba(79,70,229,0.18);
+}
+
+.how-card-badge {
+  position: absolute;
+  top: 20px;
+  left: 28px;
+  padding: 4px 12px;
+  background: var(--indigo-600);
+  color: white;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.how-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  background: #EEF2FF;
+  border-radius: 14px;
+  margin-top: 32px;
+}
+
+.how-card-icon-featured {
+  background: #E0E7FF;
+}
+
+.how-card-step {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-400);
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+.how-card-step-featured {
+  color: var(--indigo-600);
+}
+
+.how-card-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--gray-800);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.how-card-desc {
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── 최종 CTA 섹션 ── */
+.cta-section {
+  background: var(--indigo-600);
+  padding: 100px 40px;
+}
+
+.cta-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.cta-headline {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: white;
+  margin: 0 0 16px;
+}
+
+.cta-sub {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.65;
+  margin: 0 0 40px;
+}
+
+.cta-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cta-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  padding: 16px 36px;
+  background: white;
+  color: var(--indigo-600);
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cta-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.cta-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  padding: 16px 28px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s;
+}
+
+.cta-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── 섹션 뷰포트 채우기 (탭 전환 레이아웃) ── */
+#section-features .features,
+#section-how .how {
+  min-height: calc(100vh - 68px);
+  display: flex;
+  align-items: center;
+}
+
+#section-features .section-inner,
+#section-how .section-inner {
+  width: 100%;
+}
+
+/* ── 히어로 스크롤 힌트 chevron ── */
+.scroll-hint {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #A5B4FC;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.2s;
+  animation: scrollBounce 2.2s ease-in-out infinite;
+}
+
+.scroll-hint:hover {
+  color: var(--indigo-500);
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.7; }
+  50%       { transform: translateX(-50%) translateY(9px); opacity: 1; }
+}

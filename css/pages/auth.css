@@ -115,6 +115,433 @@
   .auth-left { display: none; }
   .auth-right { padding: 40px 24px; }
 }
+/* ── 로그인 단일 컬럼 레이아웃 (메일리 스타일) ── */
+.login-page {
+  background: #F9FAFB;
+  min-height: 100vh;
+}
+
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 36px 24px 0;
+}
+
+.login-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.login-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--indigo-600);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-logo-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gray-800);
+  letter-spacing: -0.02em;
+}
+
+.login-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px 80px;
+  width: 100%;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 460px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 20px;
+  padding: 40px 44px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--gray-800);
+  letter-spacing: -0.03em;
+  text-align: center;
+  margin: 0 0 28px;
+}
+
+.login-alert {
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.login-alert-error {
+  background: #FEF2F2;
+  border: 1px solid #FEE2E2;
+  color: var(--error);
+}
+
+.login-alert-success {
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  color: #059669;
+}
+
+.login-forgot {
+  font-size: 13px;
+  color: var(--indigo-600);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-forgot:hover { text-decoration: underline; }
+
+.login-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--gray-600);
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+
+.login-remember input[type="checkbox"] {
+  accent-color: var(--indigo-600);
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.login-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: var(--indigo-600);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.login-submit-btn:hover {
+  background: var(--indigo-700);
+  transform: translateY(-1px);
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--gray-200);
+}
+
+.login-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px;
+  background: white;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font);
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.login-google-btn:hover {
+  border-color: var(--gray-300);
+  background: var(--gray-50);
+}
+
+.login-soon {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gray-400);
+}
+
+.login-signup-link {
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray-500);
+  margin: 20px 0 0;
+}
+
+.login-signup-link a {
+  color: var(--indigo-600);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-signup-link a:hover { text-decoration: underline; }
+
+/* ── 회원가입 카드 — 로그인과 동일 너비 + 스크롤 없는 콤팩트 간격 ── */
+.signup-card {
+  max-width: 460px;
+  padding: 24px 44px 28px;
+}
+
+/* 회원가입 페이지 헤더/메인 여백 축소 */
+.signup-page .login-header {
+  padding-top: 20px;
+}
+
+.signup-page .login-main {
+  padding-top: 20px;
+  padding-bottom: 16px;
+  align-items: flex-start;
+}
+
+/* 회원가입 카드 내부 간격 축소 */
+.signup-card .login-title {
+  margin-bottom: 16px;
+}
+
+.signup-card .form-group {
+  margin-bottom: 12px;
+}
+
+.signup-card .terms-single-check {
+  margin-bottom: 4px;
+}
+
+.signup-card .recaptcha-mock {
+  margin-bottom: 12px;
+}
+
+.signup-card .login-divider {
+  margin: 14px 0;
+}
+
+.signup-card .login-signup-link {
+  margin-top: 12px;
+}
+
+/* ── 휴대폰 인증 ── */
+.phone-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.otp-send-btn {
+  flex-shrink: 0;
+  padding: 0 16px;
+  height: 52px;
+  background: white;
+  border: 1.5px solid var(--indigo-600);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--indigo-600);
+  cursor: pointer;
+  font-family: var(--font);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.otp-send-btn:hover {
+  background: var(--indigo-600);
+  color: white;
+}
+
+.otp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.otp-timer {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--indigo-600);
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: right;
+}
+
+.otp-verified {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #059669;
+  margin-top: 6px;
+}
+
+/* ── 비밀번호 요구사항 체크리스트 ── */
+.pw-requirements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.pw-req {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-400);
+  transition: color 0.2s;
+}
+
+.pw-req-icon {
+  flex-shrink: 0;
+}
+
+.pw-req.met {
+  color: #059669;
+}
+
+/* ── 비밀번호 일치 확인 성공 ── */
+.pw-match-ok {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #059669;
+  margin-top: 5px;
+}
+
+/* ── 약관 단일 체크박스 ── */
+.terms-single-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  color: var(--gray-600);
+  cursor: pointer;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.terms-single-check input[type="checkbox"] {
+  accent-color: var(--indigo-600);
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.terms-link {
+  color: var(--indigo-600);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.terms-link:hover { text-decoration: underline; }
+
+/* ── reCAPTCHA 플레이스홀더 ── */
+.recaptcha-mock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: #F9F9F9;
+}
+
+.recaptcha-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--gray-700);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.recaptcha-inner input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--indigo-600);
+  flex-shrink: 0;
+}
+
+.recaptcha-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.recaptcha-brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.recaptcha-brand-text span:first-child {
+  font-size: 10px;
+  font-weight: 700;
+  color: #4A90D9;
+  letter-spacing: 0.02em;
+}
+
+.recaptcha-brand-text span:last-child {
+  font-size: 8px;
+  color: var(--gray-400);
+}
+
+/* ── 가입 버튼 비활성화 ── */
+.login-submit-btn:disabled {
+  background: var(--gray-300);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* ── 약관 링크 버튼 ── */
 .term-link {
   background: none;

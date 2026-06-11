@@ -7,6 +7,12 @@ function fmt(n) {
   return '₩' + Number(n).toLocaleString('ko-KR');
 }
 
+function fmtShort(n) {
+  if (n >= 100000000) return Math.round(n / 100000000) + '억';
+  if (n >= 10000) return (n / 10000 % 1 === 0 ? n / 10000 : (n / 10000).toFixed(1)) + '만';
+  return Number(n).toLocaleString('ko-KR');
+}
+
 function getMonthData() {
   const all = Storage.getLedger();
   const y = currentMonth.getFullYear();
@@ -83,14 +89,11 @@ function renderCalendar() {
 
     let dotsHtml = '';
     if (txs.length > 0) {
-      dotsHtml = '<div class="cal-dots">';
-      const show = txs.slice(0, 3);
-      show.forEach(t => {
-        dotsHtml += `<span class="cal-dot cal-dot-${t.type === 'income' ? 'income' : 'expense'}"></span>`;
-      });
-      if (txs.length > 3) {
-        dotsHtml += `<span class="cal-dot-more">+${txs.length - 3}</span>`;
-      }
+      const incomeTotal  = txs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+      const expenseTotal = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+      dotsHtml = '<div class="cal-amounts">';
+      if (incomeTotal  > 0) dotsHtml += `<span class="cal-amount-pill cal-amount-income">+${fmtShort(incomeTotal)}</span>`;
+      if (expenseTotal > 0) dotsHtml += `<span class="cal-amount-pill cal-amount-expense">-${fmtShort(expenseTotal)}</span>`;
       dotsHtml += '</div>';
     }
 
@@ -256,8 +259,36 @@ function handleCSVUpload(file) {
 
       let dateStr = cols[0];
       const desc = cols[1] || '가져온 내역';
-      const rawAmount = cols[2].replace(/[^0-9-]/g, '');
-      const amount = Math.abs(parseInt(rawAmount));
+      const col2 = cols[2] || '';
+      const col3 = cols[3] || '';
+
+      let amount, type;
+
+      // 포맷 1: col3가 입금/출금 구분 텍스트인 경우
+      if (col3 === '입금' || col3 === '출금' || col3 === '입' || col3 === '출') {
+        amount = Math.abs(parseInt(col2.replace(/[^0-9]/g, '')) || 0);
+        type = (col3 === '입금' || col3 === '입') ? 'income' : 'expense';
+      }
+      // 포맷 2: 출금금액/입금금액이 별도 컬럼인 경우 (KB, 신한, 우리 등)
+      else if (cols.length >= 4) {
+        const withdrawal = parseInt(col2.replace(/[^0-9]/g, '')) || 0;
+        const deposit    = parseInt(col3.replace(/[^0-9]/g, '')) || 0;
+        if (withdrawal > 0) {
+          amount = withdrawal;
+          type = 'expense';
+        } else if (deposit > 0) {
+          amount = deposit;
+          type = 'income';
+        } else return;
+      }
+      // 포맷 3: 금액에 부호가 있는 단일 컬럼 (- = 지출)
+      else {
+        const rawAmount = col2.replace(/[^0-9-]/g, '');
+        const parsed = parseInt(rawAmount);
+        if (isNaN(parsed) || parsed === 0) return;
+        amount = Math.abs(parsed);
+        type = parsed < 0 ? 'expense' : 'income';
+      }
 
       if (!amount) return;
 
@@ -265,7 +296,6 @@ function handleCSVUpload(file) {
       if (!/^\d{4}-\d{2}-\d{2}/.test(dateStr)) return;
       dateStr = dateStr.slice(0, 10);
 
-      const type = parseInt(rawAmount) >= 0 ? 'income' : 'expense';
       const category = guessCategory(desc);
 
       const existing = Storage.getLedger();

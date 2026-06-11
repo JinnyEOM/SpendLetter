@@ -8,71 +8,40 @@
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/pages/auth.css">
 </head>
-<body>
+<body class="login-page signup-page">
 
-<div class="auth-shell">
+<div class="login-shell">
 
-  <!-- LEFT: 브랜드 패널 -->
-  <div class="auth-left">
-    <div class="auth-left-content">
-      <a href="index.html" class="auth-brand">
-        <div class="nav-icon" style="width:36px;height:36px;background:rgba(255,255,255,0.2);">
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" fill="white"/></svg>
-        </div>
-        <span class="auth-brand-name">SpendLetter</span>
-      </a>
-
-      <h1 class="auth-headline">내 소비가<br>뉴스가 된다</h1>
-      <p class="auth-desc">소비 패턴을 분석해 나에게 꼭 맞는<br>뉴스레터를 매일 자동으로 추천해드려요</p>
-
-      <div class="auth-features">
-        <div class="auth-feature">
-          <div class="auth-feature-icon">📊</div>
-          <div class="auth-feature-text"><strong style="color:white;">소비 데이터 분석</strong><br>거래 내역을 AI가 자동으로 분석</div>
-        </div>
-        <div class="auth-feature">
-          <div class="auth-feature-icon">🗞️</div>
-          <div class="auth-feature-text"><strong style="color:white;">맞춤 뉴스 추천</strong><br>TOP 3 카테고리 기반으로 매달 업데이트</div>
-        </div>
-        <div class="auth-feature">
-          <div class="auth-feature-icon">✉️</div>
-          <div class="auth-feature-text"><strong style="color:white;">이메일 뉴스레터</strong><br>매일 아침 핵심 뉴스를 요약해서 전송</div>
-        </div>
+  <!-- 로고 헤더 -->
+  <header class="login-header">
+    <a href="index.html" class="login-logo-link">
+      <div class="login-logo-icon">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" fill="white"/>
+        </svg>
       </div>
-    </div>
-  </div>
+      <span class="login-logo-name">SpendLetter</span>
+    </a>
+  </header>
 
-  <!-- RIGHT: 회원가입 폼 -->
-  <div class="auth-right">
-    <div class="auth-form-wrap">
+  <!-- 폼 영역 -->
+  <main class="login-main">
+    <div class="login-card signup-card">
 
-      <div style="margin-bottom:32px;">
-        <div class="section-badge" style="display:inline-block;margin-bottom:12px;">무료로 시작하기</div>
-        <h2 class="auth-form-title">계정 만들기</h2>
-        <p class="auth-form-sub">이미 계정이 있으신가요? <a href="login.html" style="color:var(--indigo-600);font-weight:600;text-decoration:none;">로그인하기 →</a></p>
-      </div>
+      <h1 class="login-title">회원가입</h1>
 
       <!-- 에러 메시지 -->
-      <div id="globalError" style="display:none;background:#FEF2F2;border:1px solid #FEE2E2;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--error);font-weight:500;"></div>
+      <div id="globalError" class="login-alert login-alert-error" style="display:none;"></div>
 
       <form id="signupForm" novalidate>
 
         <!-- 이름 -->
-        <div class="name-row">
-          <div class="form-group">
-            <label for="lastName">성</label>
-            <div class="input-wrapper">
-              <input type="text" id="lastName" placeholder="김" autocomplete="family-name">
-            </div>
-            <span class="error-msg" id="lastNameError"></span>
+        <div class="form-group">
+          <label for="nickname">이름</label>
+          <div class="input-wrapper">
+            <input type="text" id="nickname" placeholder="이름을 입력하세요" autocomplete="name">
           </div>
-          <div class="form-group">
-            <label for="firstName">이름</label>
-            <div class="input-wrapper">
-              <input type="text" id="firstName" placeholder="철수" autocomplete="given-name">
-            </div>
-            <span class="error-msg" id="firstNameError"></span>
-          </div>
+          <span class="error-msg" id="nicknameError"></span>
         </div>
 
         <!-- 이메일 -->
@@ -84,25 +53,57 @@
           <span class="error-msg" id="emailError"></span>
         </div>
 
-        <div class="step-divider">
-          <div class="step-divider-line"></div>
-          <span class="step-divider-text">비밀번호 설정</span>
-          <div class="step-divider-line"></div>
+        <!-- 휴대폰 본인 확인 -->
+        <div class="form-group">
+          <label>휴대폰 번호</label>
+          <div class="phone-row">
+            <div class="input-wrapper" style="flex:1;">
+              <input type="tel" id="phone" placeholder="010-0000-0000" maxlength="13" autocomplete="tel">
+            </div>
+            <button type="button" class="otp-send-btn" id="sendOtpBtn" onclick="sendOtp()">인증번호 발송</button>
+          </div>
+          <span class="error-msg" id="phoneError"></span>
+        </div>
+        <div class="form-group" id="otpGroup" style="display:none;">
+          <label>인증번호</label>
+          <div class="otp-row">
+            <div class="input-wrapper" style="flex:1;">
+              <input type="text" id="otpInput" placeholder="6자리 숫자 입력" maxlength="6" inputmode="numeric">
+            </div>
+            <span class="otp-timer" id="otpTimer">3:00</span>
+          </div>
+          <span class="error-msg" id="otpError"></span>
+          <div class="otp-verified" id="otpVerified" style="display:none;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            인증이 완료됐어요
+          </div>
         </div>
 
         <!-- 비밀번호 -->
         <div class="form-group">
           <label for="password">비밀번호</label>
           <div class="input-wrapper">
-            <input type="password" id="password" placeholder="영문 + 숫자 8자 이상" autocomplete="new-password">
+            <input type="password" id="password" placeholder="영문 + 숫자 + 특수문자 8자 이상" autocomplete="new-password">
             <button type="button" class="toggle-pw" id="togglePw">보기</button>
           </div>
-          <div class="pw-strength" id="pwStrength" style="display:none;">
-            <div class="pw-bar" id="bar1"></div>
-            <div class="pw-bar" id="bar2"></div>
-            <div class="pw-bar" id="bar3"></div>
-            <div class="pw-bar" id="bar4"></div>
-            <span class="pw-strength-label" id="pwLabel"></span>
+          <!-- 비밀번호 요구사항 체크리스트 -->
+          <div class="pw-requirements" id="pwRequirements" style="display:none;">
+            <span class="pw-req" id="req-length">
+              <svg class="pw-req-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1.2"/></svg>
+              8자 이상
+            </span>
+            <span class="pw-req" id="req-eng">
+              <svg class="pw-req-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1.2"/></svg>
+              영문
+            </span>
+            <span class="pw-req" id="req-num">
+              <svg class="pw-req-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1.2"/></svg>
+              숫자
+            </span>
+            <span class="pw-req" id="req-special">
+              <svg class="pw-req-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1.2"/></svg>
+              특수문자
+            </span>
           </div>
           <span class="error-msg" id="passwordError"></span>
         </div>
@@ -115,57 +116,75 @@
             <button type="button" class="toggle-pw" id="togglePwConfirm">보기</button>
           </div>
           <span class="error-msg" id="passwordConfirmError"></span>
+          <div class="pw-match-ok" id="pwMatchOk" style="display:none;">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            비밀번호가 일치합니다
+          </div>
         </div>
 
-        <div class="step-divider">
-          <div class="step-divider-line"></div>
-          <span class="step-divider-text">약관 동의</span>
-          <div class="step-divider-line"></div>
+        <!-- 약관 동의 (단일 체크박스) -->
+        <label class="terms-single-check">
+          <input type="checkbox" id="agreeTerms">
+          <span>
+            <a href="terms.html" class="terms-link" target="_blank">이용약관</a>과
+            <a href="privacy.html" class="terms-link" target="_blank">개인정보 처리방침</a>에 동의합니다.
+          </span>
+        </label>
+        <span class="error-msg" id="termsError" style="display:block;margin-bottom:8px;"></span>
+
+        <!-- reCAPTCHA 플레이스홀더 -->
+        <div class="recaptcha-mock">
+          <label class="recaptcha-inner">
+            <input type="checkbox" id="notRobot">
+            <span>로봇이 아닙니다</span>
+          </label>
+          <div class="recaptcha-brand">
+            <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+              <path d="M32 8C19.85 8 10 17.85 10 30s9.85 22 22 22 22-9.85 22-22S44.15 8 32 8z" fill="#4A90D9" opacity="0.15"/>
+              <path d="M32 14c-8.84 0-16 7.16-16 16s7.16 16 16 16 16-7.16 16-16" stroke="#4A90D9" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M44 24l4-6-6 1" stroke="#4A90D9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="recaptcha-brand-text">
+              <span>reCAPTCHA</span>
+              <span>개인정보 · 약관</span>
+            </div>
+          </div>
         </div>
 
-        <!-- 약관 -->
-        <div class="terms-check">
-          <input type="checkbox" id="agreeAll">
-          <label for="agreeAll" style="font-weight:700;color:var(--gray-800);">전체 동의</label>
-        </div>
-        <div style="border-top:1px solid var(--gray-100);margin-bottom:12px;"></div>
-        <div class="terms-check">
-          <input type="checkbox" id="agreeService" class="term-item">
-          <label for="agreeService">[필수] <button type="button" class="term-link" onclick="openTermModal('service')">서비스 이용약관</button>에 동의합니다</label>
-        </div>
-        <div class="terms-check">
-          <input type="checkbox" id="agreePrivacy" class="term-item">
-          <label for="agreePrivacy">[필수] <button type="button" class="term-link" onclick="openTermModal('privacy')">개인정보 처리방침</button>에 동의합니다</label>
-        </div>
-        <div class="terms-check" style="margin-bottom:24px;">
-          <input type="checkbox" id="agreeMarketing" class="term-item">
-          <label for="agreeMarketing">[선택] <button type="button" class="term-link" onclick="openTermModal('marketing')">마케팅 정보 수신</button>에 동의합니다</label>
-        </div>
-        <span class="error-msg" id="termsError" style="display:block;margin-top:-16px;margin-bottom:16px;"></span>
+        <!-- 가입하기 버튼 -->
+        <button type="submit" class="login-submit-btn" id="submitBtn" disabled>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="8" rx="2" stroke="white" stroke-width="1.5"/>
+            <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          가입하기
+        </button>
 
-        <button type="submit" class="submit-btn">계정 만들기 →</button>
       </form>
 
-      <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:20px;line-height:1.6;">
-        가입하면 SpendLetter의 서비스 이용약관 및<br>개인정보 처리방침에 동의한 것으로 간주합니다.
-      </p>
-    </div>
-  </div>
-</div>
+      <!-- 구분선 -->
+      <div class="login-divider"><span>또는</span></div>
 
-<!-- ── 약관 모달 ── -->
-<div class="modal-overlay" id="termModal" onclick="if(event.target===this)closeTermModal()">
-  <div class="modal" style="max-width:560px;max-height:80vh;display:flex;flex-direction:column;">
-    <div class="modal-header">
-      <h2 class="modal-title" id="termModalTitle"></h2>
-      <button class="modal-close" onclick="closeTermModal()">×</button>
+      <!-- 구글 버튼 (준비 중) -->
+      <button type="button" class="login-google-btn" onclick="alert('구글 로그인은 준비 중입니다.')">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908C16.658 14.108 17.64 11.8 17.64 9.2z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        구글로 시작하기
+        <span class="login-soon">(준비 중)</span>
+      </button>
+
+      <!-- 로그인 링크 -->
+      <p class="login-signup-link">
+        이미 계정이 있으신가요? <a href="login.html">로그인 →</a>
+      </p>
+
     </div>
-    <div id="termModalBody" style="overflow-y:auto;flex:1;font-size:14px;color:var(--gray-600);line-height:1.8;padding-right:4px;"></div>
-    <div style="margin-top:24px;display:flex;gap:10px;">
-      <button class="submit-btn" style="margin-top:0;" onclick="agreeAndClose()">동의하고 닫기</button>
-      <button type="button" onclick="closeTermModal()" style="flex:0 0 auto;height:54px;padding:0 20px;background:white;color:var(--gray-600);border:1.5px solid var(--gray-200);border-radius:10px;font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer;">닫기</button>
-    </div>
-  </div>
+  </main>
+
 </div>
 
   <script src="js/storage.js"></script>

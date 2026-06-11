@@ -115,11 +115,14 @@ body {
 
 /* ── HERO ── */
 .hero {
-  padding: 120px 40px 80px;
+  padding: 80px 0 64px;
   background: linear-gradient(160deg, #F8F9FF 0%, #EEF2FF 40%, #F0FDF4 100%);
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 28px;
 }
 
 .hero-inner {

@@ -14,6 +14,8 @@ let currentStep = 1;
       item.style.borderColor = 'var(--indigo-500)';
       item.style.background = 'var(--indigo-50)';
       selectedMethod = item.dataset.method;
+      const errEl = document.getElementById('methodError');
+      if (errEl) errEl.style.display = 'none';
     });
   });
 
@@ -49,6 +51,17 @@ let currentStep = 1;
     document.getElementById('emailSettings').style.pointerEvents = this.checked ? 'all' : 'none';
   });
 
+  function goStep1Next() {
+    if (!selectedMethod) {
+      const errEl = document.getElementById('methodError');
+      errEl.textContent = '입력 방식을 선택해주세요.';
+      errEl.style.display = 'block';
+      return;
+    }
+    document.getElementById('methodError').style.display = 'none';
+    goStep(2);
+  }
+
   function goStep(n) {
     document.getElementById('step' + currentStep).style.display = 'none';
     document.getElementById('step' + n).style.display = 'block';
@@ -73,6 +86,7 @@ let currentStep = 1;
   function finishOnboarding() {
     Storage.setCategories(selectedCategories.slice(0, 3));
     Storage.setEmailSubscription(document.getElementById('emailToggle').checked);
+    if (selectedMethod) localStorage.setItem('sl_input_method', selectedMethod);
     window.location.href = 'feed.html';
   }
 

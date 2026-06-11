@@ -8,58 +8,36 @@
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/pages/auth.css">
 </head>
-<body>
+<body class="login-page">
 
-<div class="auth-shell">
+<div class="login-shell">
 
-  <!-- LEFT -->
-  <div class="auth-left">
-    <div class="auth-left-content">
-      <a href="index.html" class="auth-brand">
-        <div class="nav-icon" style="width:36px;height:36px;background:rgba(255,255,255,0.2);">
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" fill="white"/></svg>
-        </div>
-        <span class="auth-brand-name">SpendLetter</span>
-      </a>
-
-      <h1 class="auth-headline">다시 돌아오셨군요!</h1>
-      <p class="auth-desc">오늘도 나만의 맞춤 뉴스레터로<br>스마트하게 하루를 시작해요.</p>
-
-      <div class="auth-features">
-        <div class="auth-feature">
-          <div class="auth-feature-icon">📊</div>
-          <div class="auth-feature-text"><strong style="color:white;">소비 데이터 분석</strong><br>거래 내역을 AI가 자동으로 분석</div>
-        </div>
-        <div class="auth-feature">
-          <div class="auth-feature-icon">🗞️</div>
-          <div class="auth-feature-text"><strong style="color:white;">맞춤 뉴스 추천</strong><br>TOP 3 카테고리 기반으로 매달 업데이트</div>
-        </div>
-        <div class="auth-feature">
-          <div class="auth-feature-icon">✉️</div>
-          <div class="auth-feature-text"><strong style="color:white;">이메일 뉴스레터</strong><br>매일 아침 핵심 뉴스를 요약해서 전송</div>
-        </div>
+  <!-- 로고 헤더 -->
+  <header class="login-header">
+    <a href="index.html" class="login-logo-link">
+      <div class="login-logo-icon">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" fill="white"/>
+        </svg>
       </div>
-    </div>
-  </div>
+      <span class="login-logo-name">SpendLetter</span>
+    </a>
+  </header>
 
-  <!-- RIGHT -->
-  <div class="auth-right">
-    <div class="auth-form-wrap">
+  <!-- 폼 영역 -->
+  <main class="login-main">
+    <div class="login-card">
 
-      <div style="margin-bottom:32px;">
-        <div class="section-badge" style="display:inline-block;margin-bottom:12px;">로그인</div>
-        <h2 class="auth-form-title">다시 오셨어요 👋</h2>
-        <p class="auth-form-sub">계정이 없으신가요? <a href="signup.html" style="color:var(--indigo-600);font-weight:600;text-decoration:none;">무료로 시작하기 →</a></p>
-      </div>
+      <h1 class="login-title">로그인</h1>
 
       <!-- 에러 메시지 -->
-      <div id="globalError" style="display:none;background:#FEF2F2;border:1px solid #FEE2E2;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--error);font-weight:500;"></div>
-
+      <div id="globalError" class="login-alert login-alert-error" style="display:none;"></div>
       <!-- 성공 메시지 -->
-      <div id="globalSuccess" style="display:none;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#059669;font-weight:500;"></div>
+      <div id="globalSuccess" class="login-alert login-alert-success" style="display:none;"></div>
 
       <form id="loginForm" novalidate>
 
+        <!-- 이메일 -->
         <div class="form-group">
           <label for="email">이메일</label>
           <div class="input-wrapper">
@@ -68,7 +46,8 @@
           <span class="error-msg" id="emailError"></span>
         </div>
 
-        <div class="form-group" style="margin-bottom:8px;">
+        <!-- 비밀번호 -->
+        <div class="form-group" style="margin-bottom:6px;">
           <label for="password">비밀번호</label>
           <div class="input-wrapper">
             <input type="password" id="password" placeholder="비밀번호 입력" autocomplete="current-password">
@@ -77,33 +56,51 @@
           <span class="error-msg" id="passwordError"></span>
         </div>
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
-          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;color:var(--gray-600);">
-            <input type="checkbox" id="rememberMe" style="accent-color:var(--indigo-600);">
-            로그인 유지
-          </label>
-          <a href="#" style="font-size:13px;color:var(--indigo-600);text-decoration:none;font-weight:600;">비밀번호 찾기</a>
+        <!-- 비밀번호 찾기 링크 -->
+        <div style="text-align:right;margin-bottom:18px;">
+          <a href="#" class="login-forgot">비밀번호를 잊으셨나요?</a>
         </div>
 
-        <button type="submit" class="submit-btn">로그인</button>
+        <!-- 로그인 유지 체크박스 -->
+        <label class="login-remember">
+          <input type="checkbox" id="rememberMe">
+          로그인 정보 기억하기
+        </label>
+
+        <!-- 로그인 버튼 -->
+        <button type="submit" class="login-submit-btn">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="8" rx="2" stroke="white" stroke-width="1.5"/>
+            <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          로그인하기
+        </button>
+
       </form>
 
-      <div style="display:flex;align-items:center;gap:12px;margin:24px 0;">
-        <div style="flex:1;height:1px;background:var(--gray-200);"></div>
-        <span style="font-size:12px;color:var(--gray-400);">또는</span>
-        <div style="flex:1;height:1px;background:var(--gray-200);"></div>
-      </div>
+      <!-- 구분선 -->
+      <div class="login-divider"><span>또는</span></div>
 
-      <a href="signup.html" style="display:block;text-align:center;padding:14px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:14px;font-weight:600;color:var(--gray-700);text-decoration:none;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--indigo-300)';this.style.color='var(--indigo-600)'" onmouseout="this.style.borderColor='var(--gray-200)';this.style.color='var(--gray-700)'">
-        새 계정 만들기
-      </a>
+      <!-- 구글 버튼 (준비 중) -->
+      <button type="button" class="login-google-btn" onclick="alert('구글 로그인은 준비 중입니다.')">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908C16.658 14.108 17.64 11.8 17.64 9.2z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        구글로 시작하기
+        <span class="login-soon">(준비 중)</span>
+      </button>
 
-      <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:24px;line-height:1.6;">
-        SpendLetter의 <a href="#" style="color:var(--indigo-600);">이용약관</a> 및
-        <a href="#" style="color:var(--indigo-600);">개인정보 처리방침</a>을 확인해주세요.
+      <!-- 회원가입 링크 -->
+      <p class="login-signup-link">
+        아직 계정이 없으신가요? <a href="signup.html">가입하기 →</a>
       </p>
+
     </div>
-  </div>
+  </main>
+
 </div>
 
   <script src="js/storage.js"></script>

@@ -33,7 +33,7 @@ function renderNewsItem(article, index) {
 }
 
 // ── 카테고리 카드 렌더 ──
-function renderCategoryCard(cat, articles, isAI = false) {
+function renderCategoryCard(cat, articles, isAI = false, containerId = '') {
   const aiBadge = isAI ? `<span class="ai-badge">AI</span>` : '';
   const hasMore = articles.length > 5;
 
@@ -47,20 +47,23 @@ function renderCategoryCard(cat, articles, isAI = false) {
         ${aiBadge}
         <span class="news-card-cat">${cat}</span>
       </div>
-      ${hasMore ? `<button onclick="expandCard(this)" class="expand-btn" style="display:flex;align-items:center;padding:0;color:var(--gray-400);">
+      ${hasMore ? `<button onclick="expandCard('${containerId}')" class="expand-btn" style="display:flex;align-items:center;padding:0;color:var(--gray-400);">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>` : ''}
     </div>
     <div class="news-rank-list">${items}</div>
     ${hasMore ? `<div class="news-card-foot">
-      <button onclick="expandCard(this)" class="expand-btn">더보기</button>
+      <button onclick="expandCard('${containerId}')" class="expand-btn">더보기</button>
     </div>` : ''}
   </div>`;
 }
 
 // ── 카드 더보기/접기 토글 ──
-function expandCard(btn) {
-  const card = btn.closest('.news-card');
+function expandCard(containerId) {
+  const container = document.getElementById(containerId);
+  const card = container?.querySelector('.news-card');
+  if (!card) return;
+
   const isExpanded = card.dataset.expanded === '1';
   const list = card.querySelector('.news-rank-list');
   const foot = card.querySelector('.news-card-foot');
@@ -94,7 +97,7 @@ async function loadAndRenderCard(cat, containerId, isAI = false) {
 
   const cached = Storage.getNewsCache(cat);
   if (cached) {
-    container.innerHTML = renderCategoryCard(cat, cached, isAI);
+    container.innerHTML = renderCategoryCard(cat, cached, isAI, containerId);
     return;
   }
 
@@ -112,7 +115,7 @@ async function loadAndRenderCard(cat, containerId, isAI = false) {
     if (data.error) throw new Error(data.error);
     const articles = data.articles || [];
     Storage.setNewsCache(cat, articles);
-    container.innerHTML = renderCategoryCard(cat, articles, isAI);
+    container.innerHTML = renderCategoryCard(cat, articles, isAI, containerId);
   } catch (e) {
     const aiBadge2 = isAI ? `<span class="ai-badge">AI</span>` : '';
     container.innerHTML = `<div class="news-card">
@@ -134,18 +137,18 @@ function retryCard(cat, containerId, isAI) {
 
 // ── 선호 카테고리 섹션 ──
 function renderUserSection(userCats) {
-  const grid = document.getElementById('userCatGrid');
+  const grid     = document.getElementById('userCatGrid');
+  const emptyEl  = document.getElementById('userCatEmpty');
   if (!grid) return;
 
   if (!userCats.length) {
-    grid.innerHTML = `<div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 28px;text-align:center;gap:14px;">
-      <p style="font-size:15px;font-weight:700;color:var(--gray-800);letter-spacing:-0.02em;">관심 카테고리를 설정해주세요</p>
-      <p style="font-size:13px;color:var(--gray-400);line-height:1.6;">선호 카테고리를 선택하면<br>맞춤 뉴스를 바로 받아볼 수 있어요</p>
-      <a href="category.html" style="display:inline-flex;align-items:center;gap:6px;padding:10px 22px;background:var(--indigo-600);color:white;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;">카테고리 설정하러 가기 →</a>
-    </div>`;
+    grid.style.display  = 'none';
+    if (emptyEl) emptyEl.style.display = 'flex';
     return;
   }
 
+  if (emptyEl) emptyEl.style.display = 'none';
+  grid.style.display = 'grid';
   grid.innerHTML = userCats.map((_, i) => `<div id="userCard${i}"></div>`).join('');
   userCats.forEach((cat, i) => loadAndRenderCard(cat, `userCard${i}`, false));
 }
@@ -159,18 +162,17 @@ function renderAISection() {
   const reco = Storage.getAIRecommendation();
   let aiCats = reco?.categories?.length ? reco.categories.slice(0, 3) : null;
 
-  if (reco?.year && reco?.month && subEl) {
-    subEl.textContent = `${reco.year}년 ${reco.month}월 소비 분석 기반 · AI 자동 선정`;
+  if (subEl) {
+    const month = reco?.month || (new Date().getMonth() + 1);
+    subEl.textContent = `${month}월 지출 기록을 바탕으로 추천 드려요`;
   }
 
   if (!aiCats) {
     const expenses = Storage.getLedger().filter(t => t.type === 'expense');
     if (!expenses.length) {
-      grid.innerHTML = `<div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 28px;text-align:center;gap:14px;">
-        <p style="font-size:15px;font-weight:700;color:var(--gray-800);letter-spacing:-0.02em;">가계부를 입력하면 분석이 시작돼요</p>
-        <p style="font-size:13px;color:var(--gray-400);line-height:1.6;">지출을 3건 이상 입력하면<br>AI가 카테고리를 추천해 드립니다</p>
-        <a href="ledger.html" style="display:inline-flex;align-items:center;gap:6px;padding:10px 22px;background:var(--indigo-600);color:white;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;">가계부 입력하러 가기 →</a>
-      </div>`;
+      grid.style.display = 'none';
+      const emptyEl = document.getElementById('aiCatEmpty');
+      if (emptyEl) emptyEl.style.display = 'flex';
       return;
     }
     const catSum = expenses.reduce((acc, t) => {
@@ -187,6 +189,9 @@ function renderAISection() {
     }
   }
 
+  const aiEmptyEl = document.getElementById('aiCatEmpty');
+  if (aiEmptyEl) aiEmptyEl.style.display = 'none';
+  grid.style.display = 'grid';
   grid.innerHTML = aiCats.map((_, i) => `<div id="aiCard${i}"></div>`).join('');
   aiCats.forEach((cat, i) => loadAndRenderCard(cat, `aiCard${i}`, true));
 }
