@@ -403,3 +403,254 @@
   0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.7; }
   50%       { transform: translateX(-50%) translateY(9px); opacity: 1; }
 }
+
+/* ── 푸터 개인정보처리방침 버튼 ── */
+.footer-policy-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font);
+  transition: color 0.2s;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.footer-policy-btn:hover { color: white; }
+
+/* ── 개인정보처리방침 모달 ── */
+.privacy-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.privacy-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.privacy-modal {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  transform: translateY(12px);
+  transition: transform 0.2s;
+}
+.privacy-overlay.open .privacy-modal { transform: translateY(0); }
+
+.privacy-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--gray-200);
+  flex-shrink: 0;
+}
+.privacy-modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gray-800);
+  letter-spacing: -0.02em;
+}
+.privacy-close {
+  width: 32px;
+  height: 32px;
+  background: var(--gray-100);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-600);
+  transition: background 0.15s;
+}
+.privacy-close:hover { background: var(--gray-200); }
+
+.privacy-modal-body {
+  overflow-y: auto;
+  padding: 24px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.privacy-effective {
+  font-size: 13px;
+  color: var(--gray-400);
+  font-weight: 500;
+}
+.privacy-intro {
+  font-size: 14px;
+  color: var(--gray-600);
+  line-height: 1.7;
+}
+
+.privacy-section h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+.privacy-section p {
+  font-size: 13px;
+  color: var(--gray-600);
+  line-height: 1.75;
+}
+.privacy-section ul {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 6px;
+}
+.privacy-section li {
+  font-size: 13px;
+  color: var(--gray-600);
+  line-height: 1.65;
+}
+.privacy-section a {
+  color: var(--indigo-600);
+  text-decoration: none;
+}
+.privacy-section a:hover { text-decoration: underline; }
+
+.privacy-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 13px;
+}
+.privacy-table th {
+  background: var(--gray-50);
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-200);
+}
+.privacy-table td {
+  padding: 9px 12px;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-200);
+  line-height: 1.5;
+}
+
+/* ── 개인정보처리방침 개선 요소 ── */
+
+/* 시행일 — 헤더 아래 작은 텍스트 */
+.privacy-modal-head .privacy-effective {
+  font-size: 12px;
+  color: var(--gray-400);
+  margin-top: 3px;
+}
+
+/* 목차 박스 */
+.privacy-toc {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+.privacy-toc-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-400);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.privacy-toc-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  counter-reset: toc;
+}
+.privacy-toc-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--gray-600);
+  counter-increment: toc;
+}
+.privacy-toc-list li::before {
+  content: "제" counter(toc) "조";
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--indigo-600);
+  background: var(--indigo-50);
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 조문 번호 뱃지 */
+.privacy-art {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--indigo-600);
+  background: var(--indigo-50);
+  padding: 1px 7px;
+  border-radius: 4px;
+  margin-right: 6px;
+  vertical-align: middle;
+  letter-spacing: 0;
+}
+
+/* 섹션 헤더 — 왼쪽 인디고 선 */
+.privacy-section h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+  padding-left: 10px;
+  border-left: 3px solid var(--indigo-500);
+}
+
+/* 항 레이블 (① ② ...) */
+.privacy-sub-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-500);
+  margin: 10px 0 6px;
+}
+.privacy-sub-label:first-of-type { margin-top: 0; }
+
+/* 콜아웃 박스 */
+.privacy-callout {
+  background: var(--indigo-50);
+  border-left: 3px solid var(--indigo-500);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--indigo-700);
+  line-height: 1.7;
+  font-weight: 500;
+}
+
+/* 제3자 제공 표 — 4컬럼 */
+.privacy-table th:last-child,
+.privacy-table td:last-child {
+  font-size: 12px;
+}
